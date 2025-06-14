@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use function Pest\Stressless\stress;
 
 class ProfileViewTest extends TestCase
 {
@@ -79,5 +80,24 @@ class ProfileViewTest extends TestCase
         $response = $this->getJson("/api/view/profile/{$arda->id}?context=non-existent-context");
 
         $response->assertStatus(404);
+    }
+
+    /**
+     * A basic stress test to check performance under a small load.
+     */
+    public function test_profile_retrieval_performs_under_load(): void
+    {
+        $this->withoutExceptionHandling();
+        // We target a public context to avoid authentication overhead in the stress test.
+        // Elif's user ID is 2, and 'work' is one of her public contexts.
+        $elif = User::where('email', 'elif.kaya@hospital.com')->first();
+
+        $result = stress("api/view/profile/{$elif->id}?context=work")
+            ->concurrently(10)
+            ->for(5)->seconds();
+
+        // Assert that the average request duration is less than 100ms.
+        // This is a generous threshold and can be adjusted.
+        expect($result->requests()->duration()->avg())->toBeLessThan(100);
     }
 }
