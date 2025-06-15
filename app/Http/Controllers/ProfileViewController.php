@@ -18,6 +18,28 @@ class ProfileViewController extends Controller
         $this->profileRetrievalService = $profileRetrievalService;
     }
 
+    /**
+     * Retrieve a user's profile with context-aware access control
+     *
+     * This endpoint demonstrates the core feature of the Identity Management API:
+     * dynamic context-based profile retrieval with requester-aware access control.
+     * The API returns different profile information based on:
+     * - Who is making the request (owner, authenticated user, or public)
+     * - What context is being requested
+     * - The visibility settings of profile attributes
+     *
+     * @param Request $request The HTTP request containing optional context parameter
+     * @param User $user The user whose profile is being requested
+     * @return JsonResponse Returns profile data based on access permissions
+     *
+     * @response 200 {
+     *   "full_name": "Arda Yılmaz",
+     *   "email": "arda@university.com",
+     *   "student_id": "12345678"
+     * }
+     * @response 403 {"message": "You do not have permission to view this profile."}
+     * @response 404 {"message": "Context not found."}
+     */
     public function show(Request $request, User $user): JsonResponse
     {
         // Handle optional authentication manually
