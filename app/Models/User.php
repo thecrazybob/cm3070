@@ -67,4 +67,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(ApiClient::class);
     }
+
+    public function accessLogs(): HasMany
+    {
+        return $this->hasMany(AccessLog::class, 'user_id');
+    }
 }
