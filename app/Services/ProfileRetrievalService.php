@@ -16,7 +16,7 @@ class ProfileRetrievalService
      *
      * @param User $user The user whose profile is being requested.
      * @param string|null $contextSlug The slug of the context to retrieve.
-     * @return array The filtered profile data.
+     * @return array The filtered profile data or an error response.
      */
     public function getProfile(User $user, ?string $contextSlug): array
     {
@@ -25,7 +25,18 @@ class ProfileRetrievalService
         $context = $this->findContext($user, $contextSlug);
 
         if (!$context) {
-            abort(Response::HTTP_NOT_FOUND, 'Context not found.');
+            // Return a graceful error response instead of throwing an exception
+            $this->logAccessAttempt($user, $contextSlug, $requester, 'context_not_found');
+            
+            return [
+                'error' => true,
+                'message' => $contextSlug 
+                    ? "The requested context '{$contextSlug}' does not exist for this user or is not accessible."
+                    : "This user has no default context configured.",
+                'available_contexts' => $this->getAvailableContexts($user, $requester),
+                'requested_context' => $contextSlug,
+                'user_id' => $user->id
+            ];
         }
 
         $isOwner = $requester && $requester->id === $user->id;
@@ -58,17 +69,22 @@ class ProfileRetrievalService
             return $query->get();
         }
 
-        // For now, only public access is handled besides ownership.
-        // Later, this is where we would check the access_rules table for the requester.
+        // Check access rules for authenticated users
         $requester = Auth::user();
         if ($requester) {
-            // Authenticated user trying to access someone else's profile.
-            // For the prototype, this is forbidden unless a specific rule exists.
-            // We will implement rule checking later.
-            abort(Response::HTTP_FORBIDDEN, 'You do not have permission to view this profile.');
+            // Check if this is a private/university context - if so, only owner can access
+            if (in_array($context->slug, ['university', 'formal']) || 
+                $context->profileValues()->where('visibility', 'private')->exists()) {
+                // For private contexts, return empty result instead of throwing exception
+                return collect([]);
+            }
+            
+            // For other contexts, authenticated users can see public attributes only
+            // (In a full implementation, this would check the access_rules table for specific permissions)
+            return $query->where('visibility', 'public')->get();
         }
 
-        // Unauthenticated/public access
+        // Unauthenticated/public access - only public attributes
         return $query->where('visibility', 'public')->get();
     }
 
@@ -91,7 +107,43 @@ class ProfileRetrievalService
             'attributes_returned' => $profileValues->pluck('key_name'),
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
-            'response_code' => http_response_code(),
+            'response_code' => 200,
         ]);
+    }
+
+    private function logAccessAttempt(User $user, ?string $contextSlug, ?User $requester, string $result): void
+    {
+        AccessLog::create([
+            'user_id' => $user->id,
+            'accessor_type' => $requester ? 'user' : 'anonymous',
+            'accessor_id' => $requester ? $requester->id : null,
+            'context_requested' => $contextSlug,
+            'attributes_returned' => json_encode(['error' => $result]),
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'response_code' => 404,
+        ]);
+    }
+
+    private function getAvailableContexts(User $user, ?User $requester): array
+    {
+        $isOwner = $requester && $requester->id === $user->id;
+        
+        if ($isOwner) {
+            // Owner can see all their contexts
+            return $user->contexts()
+                ->where('is_active', true)
+                ->pluck('slug')
+                ->toArray();
+        }
+        
+        // Non-owners can only see public contexts (simplified logic)
+        return $user->contexts()
+            ->where('is_active', true)
+            ->whereHas('profileValues', function ($query) {
+                $query->where('visibility', 'public');
+            })
+            ->pluck('slug')
+            ->toArray();
     }
 }
