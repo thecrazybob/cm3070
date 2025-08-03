@@ -4,8 +4,8 @@ namespace App\Providers;
 
 use App\Models\Context;
 use Illuminate\Auth\Notifications\ResetPassword;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
             return config('app.frontend_url')."/password-reset/$token?email={$notifiable->getEmailForPasswordReset()}";
         });
 
-                // Custom route model binding for Context
+        // Custom route model binding for Context
         Route::bind('context', function ($value) {
             // If we're in an authenticated API context, only return contexts owned by the user
             if (auth()->check()) {

@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\GDPRController;
 use App\Http\Controllers\ContextController;
+use App\Http\Controllers\GDPRController;
 use App\Http\Controllers\ProfileViewController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -18,20 +18,20 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
-    
+
     // Context Management
     Route::get('/contexts', [ContextController::class, 'index']);
     Route::post('/contexts', [ContextController::class, 'store']);
     Route::get('/contexts/{contextId}', [ContextController::class, 'show'])->whereNumber('contextId');
     Route::put('/contexts/{contextId}', [ContextController::class, 'update'])->whereNumber('contextId');
     Route::delete('/contexts/{contextId}', [ContextController::class, 'destroy'])->whereNumber('contextId');
-    
+
     // Context Attributes Management
     Route::get('/contexts/{contextId}/attributes', [ContextController::class, 'getAttributes'])->whereNumber('contextId');
     Route::post('/contexts/{contextId}/attributes', [ContextController::class, 'storeAttribute'])->whereNumber('contextId');
     Route::put('/contexts/{contextId}/attributes/{attributeId}', [ContextController::class, 'updateAttribute'])->whereNumber('contextId')->whereNumber('attributeId');
     Route::delete('/contexts/{contextId}/attributes/{attributeId}', [ContextController::class, 'destroyAttribute'])->whereNumber('contextId')->whereNumber('attributeId');
-    
+
     // GDPR Compliance
     Route::get('/export-data', [GDPRController::class, 'exportData']);
     Route::get('/audit-log', [GDPRController::class, 'getAuditLog']);

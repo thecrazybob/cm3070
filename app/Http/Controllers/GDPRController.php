@@ -99,7 +99,7 @@ class GDPRController extends Controller
     public function getAuditLog(Request $request): JsonResponse
     {
         $user = $request->user();
-        
+
         $logs = AccessLog::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->limit(100) // Limit to last 100 access logs
@@ -138,7 +138,7 @@ class GDPRController extends Controller
         $user = $request->user();
 
         // Verify password
-        if (!Hash::check($request->password, $user->password)) {
+        if (! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'password' => ['The provided password is incorrect.'],
             ]);
@@ -153,21 +153,21 @@ class GDPRController extends Controller
 
         // Delete all related data (cascade deletion should handle most of this)
         // But we'll be explicit for GDPR compliance
-        
+
         // Delete access logs
         AccessLog::where('user_id', $user->id)->delete();
-        
+
         // Delete profile values for all contexts
         foreach ($user->contexts as $context) {
             $context->profileValues()->delete();
         }
-        
+
         // Delete contexts
         $user->contexts()->delete();
-        
+
         // Delete all user tokens
         $user->tokens()->delete();
-        
+
         // Finally delete the user
         $user->delete();
 

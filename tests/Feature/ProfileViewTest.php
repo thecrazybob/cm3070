@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use Database\Seeders\FeaturePrototypeSeeder;
 use Laravel\Sanctum\Sanctum;
+
 use function Pest\Stressless\stress;
 
 beforeEach(function () {
@@ -39,6 +40,6 @@ test('accessing non existent context returns not found', function () {
 });
 
 test('profile retrieval performs under load', function () {
-    $result = stress("api/view/profile/1?context=work")->concurrently(10)->for(5)->seconds();
+    $result = stress('api/view/profile/1?context=work')->concurrently(10)->for(5)->seconds();
     expect($result->requests()->duration()->avg())->toBeLessThan(100);
 });

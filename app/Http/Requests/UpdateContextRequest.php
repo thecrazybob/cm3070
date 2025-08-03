@@ -30,7 +30,7 @@ class UpdateContextRequest extends FormRequest
                 'regex:/^[a-z0-9-]+$/',
                 Rule::unique('contexts')->where(function ($query) use ($context) {
                     return $query->where('user_id', $this->user()->id)
-                                 ->where('id', '!=', $context->id);
+                        ->where('id', '!=', $context->id);
                 }),
             ],
             'name' => ['sometimes', 'string', 'max:255'],

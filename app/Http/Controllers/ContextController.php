@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateContextRequest;
-use App\Http\Requests\UpdateContextRequest;
 use App\Http\Requests\CreateProfileAttributeRequest;
+use App\Http\Requests\UpdateContextRequest;
 use App\Http\Requests\UpdateProfileAttributeRequest;
 use App\Models\Context;
 use App\Models\ContextProfileValue;
@@ -78,9 +78,9 @@ class ContextController extends Controller
     public function show(Request $request, int $contextId): JsonResponse
     {
         $context = Context::find($contextId);
-        
+
         // Check if context exists and user owns it
-        if (!$context || $context->user_id !== $request->user()->id) {
+        if (! $context || $context->user_id !== $request->user()->id) {
             return response()->json(['message' => 'Context not found'], 404);
         }
 
@@ -119,14 +119,14 @@ class ContextController extends Controller
     public function update(UpdateContextRequest $request, int $contextId): JsonResponse
     {
         $context = Context::find($contextId);
-        
+
         // Check if context exists and user owns it
-        if (!$context || $context->user_id !== $request->user()->id) {
+        if (! $context || $context->user_id !== $request->user()->id) {
             return response()->json(['message' => 'Context not found'], 404);
         }
 
         // Ensure only one default context
-        if ($request->is_default && !$context->is_default) {
+        if ($request->is_default && ! $context->is_default) {
             $request->user()->contexts()->where('id', '!=', $context->id)->update(['is_default' => false]);
         }
 
@@ -151,9 +151,9 @@ class ContextController extends Controller
     public function destroy(Request $request, int $contextId): JsonResponse
     {
         $context = Context::find($contextId);
-        
+
         // Check if context exists and user owns it
-        if (!$context || $context->user_id !== $request->user()->id) {
+        if (! $context || $context->user_id !== $request->user()->id) {
             return response()->json(['message' => 'Context not found'], 404);
         }
 
@@ -177,9 +177,9 @@ class ContextController extends Controller
     public function getAttributes(Request $request, int $contextId): JsonResponse
     {
         $context = Context::find($contextId);
-        
+
         // Check if context exists and user owns it
-        if (!$context || $context->user_id !== $request->user()->id) {
+        if (! $context || $context->user_id !== $request->user()->id) {
             return response()->json(['message' => 'Context not found'], 404);
         }
 
@@ -211,9 +211,9 @@ class ContextController extends Controller
     public function storeAttribute(CreateProfileAttributeRequest $request, int $contextId): JsonResponse
     {
         $context = Context::find($contextId);
-        
+
         // Check if context exists and user owns it
-        if (!$context || $context->user_id !== $request->user()->id) {
+        if (! $context || $context->user_id !== $request->user()->id) {
             return response()->json(['message' => 'Context not found'], 404);
         }
 
@@ -271,10 +271,10 @@ class ContextController extends Controller
     {
         $context = Context::find($contextId);
         $profileValue = ContextProfileValue::find($attributeId);
-        
+
         // Check if context and profile value exist and user owns them
-        if (!$context || !$profileValue || 
-            $context->user_id !== $request->user()->id || 
+        if (! $context || ! $profileValue ||
+            $context->user_id !== $request->user()->id ||
             $profileValue->user_id !== $request->user()->id) {
             return response()->json(['message' => 'Attribute not found'], 404);
         }
@@ -298,10 +298,10 @@ class ContextController extends Controller
     {
         $context = Context::find($contextId);
         $profileValue = ContextProfileValue::find($attributeId);
-        
+
         // Check if context and profile value exist and user owns them
-        if (!$context || !$profileValue || 
-            $context->user_id !== $request->user()->id || 
+        if (! $context || ! $profileValue ||
+            $context->user_id !== $request->user()->id ||
             $profileValue->user_id !== $request->user()->id) {
             return response()->json(['message' => 'Attribute not found'], 404);
         }

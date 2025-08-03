@@ -13,7 +13,7 @@ class DashboardController extends Controller
     public function index(Request $request): View
     {
         $user = $request->user();
-        
+
         return view('custom-dashboard', [
             'user' => $user,
             'contexts' => $user->contexts()->with('profileValues.attribute')->get(),

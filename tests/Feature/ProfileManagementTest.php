@@ -2,8 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Context;
-use App\Models\ContextProfileValue;
 use App\Models\User;
 use Database\Seeders\FeaturePrototypeSeeder;
 use Laravel\Sanctum\Sanctum;
@@ -22,10 +20,10 @@ test('authenticated user can list their contexts', function () {
         ->assertJsonStructure([
             'contexts' => [
                 '*' => [
-                    'id', 'slug', 'name', 'description', 'is_default', 'is_active', 
-                    'attributes_count', 'created_at', 'updated_at'
-                ]
-            ]
+                    'id', 'slug', 'name', 'description', 'is_default', 'is_active',
+                    'attributes_count', 'created_at', 'updated_at',
+                ],
+            ],
         ]);
 });
 
@@ -89,10 +87,10 @@ test('authenticated user can view specific context with attributes', function ()
                 'attributes' => [
                     '*' => [
                         'id', 'attribute' => ['id', 'key_name', 'display_name', 'data_type'],
-                        'value', 'visibility'
-                    ]
-                ]
-            ]
+                        'value', 'visibility',
+                    ],
+                ],
+            ],
         ]);
 });
 
@@ -100,7 +98,7 @@ test('user cannot view another users context', function () {
     $arda = User::where('email', 'arda@university.com')->first();
     $elif = User::where('email', 'elif.kaya@hospital.com')->first();
     $elifContext = $elif->contexts()->first();
-    
+
     Sanctum::actingAs($arda);
 
     $response = $this->getJson("/api/profiles/{$elifContext->id}");

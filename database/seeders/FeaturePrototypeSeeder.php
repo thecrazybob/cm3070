@@ -6,7 +6,6 @@ use App\Models\Context;
 use App\Models\ContextProfileValue;
 use App\Models\ProfileAttribute;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 

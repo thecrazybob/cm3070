@@ -28,14 +28,14 @@ test('authenticated user can export their data', function () {
                         'id', 'slug', 'name', 'description', 'is_default', 'is_active',
                         'profile_values' => [
                             '*' => [
-                                'id', 'attribute', 'value', 'visibility', 'created_at', 'updated_at'
-                            ]
-                        ]
-                    ]
+                                'id', 'attribute', 'value', 'visibility', 'created_at', 'updated_at',
+                            ],
+                        ],
+                    ],
                 ],
                 'access_logs',
                 'statistics' => ['total_contexts', 'total_profile_values', 'total_access_logs', 'account_age_days'],
-            ]
+            ],
         ])
         ->assertJson([
             'message' => 'Data export generated successfully',
@@ -50,7 +50,7 @@ test('authenticated user can export their data', function () {
 
 test('authenticated user can view their audit log', function () {
     $arda = User::where('email', 'arda@university.com')->first();
-    
+
     // Create some access logs
     AccessLog::create([
         'user_id' => $arda->id,
@@ -62,7 +62,7 @@ test('authenticated user can view their audit log', function () {
         'user_agent' => 'Test User Agent',
         'response_code' => 200,
     ]);
-    
+
     Sanctum::actingAs($arda);
 
     $response = $this->getJson('/api/audit-log');
@@ -78,7 +78,7 @@ test('authenticated user can view their audit log', function () {
                     'ip_address',
                     'accessor_id',
                     'response_code',
-                ]
+                ],
             ],
             'total_logs',
         ]);
@@ -137,7 +137,7 @@ test('authenticated user can delete their account with valid password', function
 
     // Verify user is deleted
     $this->assertDatabaseMissing('users', ['id' => $ardaId]);
-    
+
     // Verify related data is deleted
     $this->assertDatabaseMissing('contexts', ['user_id' => $ardaId]);
     $this->assertDatabaseMissing('context_profile_values', ['user_id' => $ardaId]);

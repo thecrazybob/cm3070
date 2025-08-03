@@ -6,8 +6,8 @@ use App\Models\User;
 use App\Services\ProfileRetrievalService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Laravel\Sanctum\PersonalAccessToken;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class ProfileViewController extends Controller
 {
@@ -28,8 +28,8 @@ class ProfileViewController extends Controller
      * - What context is being requested
      * - The visibility settings of profile attributes
      *
-     * @param Request $request The HTTP request containing optional context parameter
-     * @param User $user The user whose profile is being requested
+     * @param  Request  $request  The HTTP request containing optional context parameter
+     * @param  User  $user  The user whose profile is being requested
      * @return JsonResponse Returns profile data based on access permissions
      *
      * @response 200 {
