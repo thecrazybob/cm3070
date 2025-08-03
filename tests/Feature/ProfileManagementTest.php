@@ -14,7 +14,7 @@ test('authenticated user can list their contexts', function () {
     $arda = User::where('email', 'arda@university.com')->first();
     Sanctum::actingAs($arda);
 
-    $response = $this->getJson('/api/profiles');
+    $response = $this->getJson('/api/contexts');
 
     $response->assertStatus(200)
         ->assertJsonStructure([
@@ -38,7 +38,7 @@ test('authenticated user can create a new context', function () {
         'is_active' => true,
     ];
 
-    $response = $this->postJson('/api/profiles', $contextData);
+    $response = $this->postJson('/api/contexts', $contextData);
 
     $response->assertStatus(201)
         ->assertJson([
@@ -67,7 +67,7 @@ test('user cannot create context with duplicate slug', function () {
         'name' => 'University Duplicate',
     ];
 
-    $response = $this->postJson('/api/profiles', $contextData);
+    $response = $this->postJson('/api/contexts', $contextData);
 
     $response->assertStatus(422)
         ->assertJsonValidationErrors(['slug']);
@@ -78,7 +78,7 @@ test('authenticated user can view specific context with attributes', function ()
     $context = $arda->contexts()->where('slug', 'university')->first();
     Sanctum::actingAs($arda);
 
-    $response = $this->getJson("/api/profiles/{$context->id}");
+    $response = $this->getJson("/api/contexts/{$context->id}");
 
     $response->assertStatus(200)
         ->assertJsonStructure([
@@ -101,7 +101,7 @@ test('user cannot view another users context', function () {
 
     Sanctum::actingAs($arda);
 
-    $response = $this->getJson("/api/profiles/{$elifContext->id}");
+    $response = $this->getJson("/api/contexts/{$elifContext->id}");
 
     $response->assertStatus(404)
         ->assertJson(['message' => 'Context not found']);
@@ -117,7 +117,7 @@ test('authenticated user can update their context', function () {
         'description' => 'Updated description for gaming',
     ];
 
-    $response = $this->putJson("/api/profiles/{$context->id}", $updateData);
+    $response = $this->putJson("/api/contexts/{$context->id}", $updateData);
 
     $response->assertStatus(200)
         ->assertJson([
@@ -138,7 +138,7 @@ test('authenticated user can delete non-default context', function () {
     $context = $arda->contexts()->where('slug', 'gaming')->first();
     Sanctum::actingAs($arda);
 
-    $response = $this->deleteJson("/api/profiles/{$context->id}");
+    $response = $this->deleteJson("/api/contexts/{$context->id}");
 
     $response->assertStatus(200)
         ->assertJson(['message' => 'Context deleted successfully']);
@@ -151,7 +151,7 @@ test('user cannot delete default context', function () {
     $defaultContext = $arda->contexts()->where('is_default', true)->first();
     Sanctum::actingAs($arda);
 
-    $response = $this->deleteJson("/api/profiles/{$defaultContext->id}");
+    $response = $this->deleteJson("/api/contexts/{$defaultContext->id}");
 
     $response->assertStatus(422)
         ->assertJson(['message' => 'Cannot delete default context']);
@@ -170,7 +170,7 @@ test('authenticated user can add attribute to context', function () {
         'visibility' => 'public',
     ];
 
-    $response = $this->postJson("/api/profiles/{$context->id}/attributes", $attributeData);
+    $response = $this->postJson("/api/contexts/{$context->id}/attributes", $attributeData);
 
     $response->assertStatus(201)
         ->assertJson([
@@ -197,7 +197,7 @@ test('authenticated user can update attribute value', function () {
         'visibility' => 'protected',
     ];
 
-    $response = $this->putJson("/api/profiles/{$context->id}/attributes/{$profileValue->id}", $updateData);
+    $response = $this->putJson("/api/contexts/{$context->id}/attributes/{$profileValue->id}", $updateData);
 
     $response->assertStatus(200)
         ->assertJson([
@@ -215,7 +215,7 @@ test('authenticated user can delete attribute from context', function () {
     $profileValue = $context->profileValues()->first();
     Sanctum::actingAs($arda);
 
-    $response = $this->deleteJson("/api/profiles/{$context->id}/attributes/{$profileValue->id}");
+    $response = $this->deleteJson("/api/contexts/{$context->id}/attributes/{$profileValue->id}");
 
     $response->assertStatus(200)
         ->assertJson(['message' => 'Attribute deleted successfully']);
@@ -224,6 +224,6 @@ test('authenticated user can delete attribute from context', function () {
 });
 
 test('unauthenticated user cannot access profile management endpoints', function () {
-    $this->getJson('/api/profiles')->assertStatus(401);
-    $this->postJson('/api/profiles', [])->assertStatus(401);
+    $this->getJson('/api/contexts')->assertStatus(401);
+    $this->postJson('/api/contexts', [])->assertStatus(401);
 });
