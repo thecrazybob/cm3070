@@ -15,30 +15,33 @@ use Illuminate\Http\Request;
 class ContextController extends Controller
 {
     /**
-     * Get all contexts for the authenticated user
+     * Get all contexts for the authenticated user with pagination
      */
     public function index(Request $request): JsonResponse
     {
+        $perPage = $request->input('per_page', 10);
+        
         $contexts = $request->user()->contexts()
-            ->with('profileValues.attribute')
-            ->get()
-            ->map(function ($context) {
-                return [
-                    'id' => $context->id,
-                    'slug' => $context->slug,
-                    'name' => $context->name,
-                    'description' => $context->description,
-                    'is_default' => $context->is_default,
-                    'is_active' => $context->is_active,
-                    'attributes_count' => $context->profileValues->count(),
-                    'created_at' => $context->created_at,
-                    'updated_at' => $context->updated_at,
-                ];
-            });
-
-        return response()->json([
-            'contexts' => $contexts,
-        ]);
+            ->withCount('profileValues')
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+        
+        // Transform the data while preserving pagination structure
+        $contexts->getCollection()->transform(function ($context) {
+            return [
+                'id' => $context->id,
+                'slug' => $context->slug,
+                'name' => $context->name,
+                'description' => $context->description,
+                'is_default' => $context->is_default,
+                'is_active' => $context->is_active,
+                'attributes_count' => $context->profile_values_count,
+                'created_at' => $context->created_at,
+                'updated_at' => $context->updated_at,
+            ];
+        });
+        
+        return response()->json($contexts);
     }
 
     /**
@@ -77,14 +80,15 @@ class ContextController extends Controller
      */
     public function show(Request $request, int $contextId): JsonResponse
     {
-        $context = Context::find($contextId);
+        $context = Context::with('profileValues.attribute')
+            ->where('id', $contextId)
+            ->where('user_id', $request->user()->id)
+            ->first();
 
-        // Check if context exists and user owns it
-        if (! $context || $context->user_id !== $request->user()->id) {
+        // Check if context exists
+        if (! $context) {
             return response()->json(['message' => 'Context not found'], 404);
         }
-
-        $context->load('profileValues.attribute');
 
         $attributes = $context->profileValues->map(function ($profileValue) {
             return [
@@ -118,10 +122,12 @@ class ContextController extends Controller
      */
     public function update(UpdateContextRequest $request, int $contextId): JsonResponse
     {
-        $context = Context::find($contextId);
+        $context = Context::where('id', $contextId)
+            ->where('user_id', $request->user()->id)
+            ->first();
 
-        // Check if context exists and user owns it
-        if (! $context || $context->user_id !== $request->user()->id) {
+        // Check if context exists
+        if (! $context) {
             return response()->json(['message' => 'Context not found'], 404);
         }
 
@@ -150,10 +156,12 @@ class ContextController extends Controller
      */
     public function destroy(Request $request, int $contextId): JsonResponse
     {
-        $context = Context::find($contextId);
+        $context = Context::where('id', $contextId)
+            ->where('user_id', $request->user()->id)
+            ->first();
 
-        // Check if context exists and user owns it
-        if (! $context || $context->user_id !== $request->user()->id) {
+        // Check if context exists
+        if (! $context) {
             return response()->json(['message' => 'Context not found'], 404);
         }
 
@@ -176,10 +184,12 @@ class ContextController extends Controller
      */
     public function getAttributes(Request $request, int $contextId): JsonResponse
     {
-        $context = Context::find($contextId);
+        $context = Context::where('id', $contextId)
+            ->where('user_id', $request->user()->id)
+            ->first();
 
-        // Check if context exists and user owns it
-        if (! $context || $context->user_id !== $request->user()->id) {
+        // Check if context exists
+        if (! $context) {
             return response()->json(['message' => 'Context not found'], 404);
         }
 
@@ -210,10 +220,12 @@ class ContextController extends Controller
      */
     public function storeAttribute(CreateProfileAttributeRequest $request, int $contextId): JsonResponse
     {
-        $context = Context::find($contextId);
+        $context = Context::where('id', $contextId)
+            ->where('user_id', $request->user()->id)
+            ->first();
 
-        // Check if context exists and user owns it
-        if (! $context || $context->user_id !== $request->user()->id) {
+        // Check if context exists
+        if (! $context) {
             return response()->json(['message' => 'Context not found'], 404);
         }
 
@@ -269,13 +281,20 @@ class ContextController extends Controller
      */
     public function updateAttribute(UpdateProfileAttributeRequest $request, int $contextId, int $attributeId): JsonResponse
     {
-        $context = Context::find($contextId);
-        $profileValue = ContextProfileValue::find($attributeId);
+        $context = Context::where('id', $contextId)
+            ->where('user_id', $request->user()->id)
+            ->first();
+        
+        if (! $context) {
+            return response()->json(['message' => 'Context not found'], 404);
+        }
+        
+        $profileValue = ContextProfileValue::where('id', $attributeId)
+            ->where('user_id', $request->user()->id)
+            ->where('context_id', $contextId)
+            ->first();
 
-        // Check if context and profile value exist and user owns them
-        if (! $context || ! $profileValue ||
-            $context->user_id !== $request->user()->id ||
-            $profileValue->user_id !== $request->user()->id) {
+        if (! $profileValue) {
             return response()->json(['message' => 'Attribute not found'], 404);
         }
 
@@ -296,13 +315,20 @@ class ContextController extends Controller
      */
     public function destroyAttribute(Request $request, int $contextId, int $attributeId): JsonResponse
     {
-        $context = Context::find($contextId);
-        $profileValue = ContextProfileValue::find($attributeId);
+        $context = Context::where('id', $contextId)
+            ->where('user_id', $request->user()->id)
+            ->first();
+        
+        if (! $context) {
+            return response()->json(['message' => 'Context not found'], 404);
+        }
+        
+        $profileValue = ContextProfileValue::where('id', $attributeId)
+            ->where('user_id', $request->user()->id)
+            ->where('context_id', $contextId)
+            ->first();
 
-        // Check if context and profile value exist and user owns them
-        if (! $context || ! $profileValue ||
-            $context->user_id !== $request->user()->id ||
-            $profileValue->user_id !== $request->user()->id) {
+        if (! $profileValue) {
             return response()->json(['message' => 'Attribute not found'], 404);
         }
 

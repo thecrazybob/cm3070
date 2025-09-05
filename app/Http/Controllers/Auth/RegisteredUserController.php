@@ -44,6 +44,10 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         Auth::login($user);
+        
+        // Create Sanctum token for API access
+        $token = $user->createToken('web-session-token')->plainTextToken;
+        $request->session()->put('api_token', $token);
 
         return redirect(route('dashboard', absolute: false));
     }

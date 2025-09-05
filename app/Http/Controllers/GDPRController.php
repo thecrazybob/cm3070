@@ -99,27 +99,29 @@ class GDPRController extends Controller
     public function getAuditLog(Request $request): JsonResponse
     {
         $user = $request->user();
+        
+        $perPage = $request->input('per_page', 10);
+        $page = $request->input('page', 1);
 
         $logs = AccessLog::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
-            ->limit(100) // Limit to last 100 access logs
-            ->get()
-            ->map(function ($log) {
-                return [
-                    'created_at' => $log->created_at,
-                    'context_requested' => $log->context_requested,
-                    'accessor_type' => $log->accessor_type,
-                    'attributes_returned' => $log->attributes_returned,
-                    'ip_address' => $log->ip_address,
-                    'accessor_id' => $log->accessor_id,
-                    'response_code' => $log->response_code,
-                ];
-            });
+            ->paginate($perPage);
 
-        return response()->json([
-            'access_logs' => $logs,
-            'total_logs' => $logs->count(),
-        ]);
+        // Transform the data while preserving pagination structure
+        $logs->getCollection()->transform(function ($log) {
+            return [
+                'id' => $log->id,
+                'created_at' => $log->created_at,
+                'context_requested' => $log->context_requested,
+                'accessor_type' => $log->accessor_type,
+                'attributes_returned' => $log->attributes_returned,
+                'ip_address' => $log->ip_address,
+                'accessor_id' => $log->accessor_id,
+                'response_code' => $log->response_code,
+            ];
+        });
+
+        return response()->json($logs);
     }
 
     /**

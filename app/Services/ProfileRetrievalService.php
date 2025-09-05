@@ -72,20 +72,77 @@ class ProfileRetrievalService
         // Check access rules for authenticated users
         $requester = Auth::user();
         if ($requester) {
-            // Check if this is a private/university context - if so, only owner can access
-            if (in_array($context->slug, ['university', 'formal']) ||
-                $context->profileValues()->where('visibility', 'private')->exists()) {
-                // For private contexts, return empty result instead of throwing exception
+            // Check if requester has any special access rules (simplified version)
+            $hasSpecialAccess = $this->checkSpecialAccess($user, $context, $requester);
+            
+            if ($hasSpecialAccess) {
+                // If user has special access, show public and protected attributes
+                return $query->whereIn('visibility', ['public', 'protected'])->get();
+            }
+            
+            // Check if this is a private context
+            if ($this->isPrivateContext($context)) {
+                // For private contexts, return empty result for non-owners
                 return collect([]);
             }
 
-            // For other contexts, authenticated users can see public attributes only
-            // (In a full implementation, this would check the access_rules table for specific permissions)
-            return $query->where('visibility', 'public')->get();
+            // For authenticated users without special access, show public and protected
+            return $query->whereIn('visibility', ['public', 'protected'])->get();
         }
 
         // Unauthenticated/public access - only public attributes
         return $query->where('visibility', 'public')->get();
+    }
+    
+    /**
+     * Check if requester has special access permissions
+     */
+    private function checkSpecialAccess(User $user, Context $context, User $requester): bool
+    {
+        // Check if users share an organization or domain
+        if ($this->sharesSameDomain($user, $requester)) {
+            return true;
+        }
+        
+        // Future: Check access_rules table for specific permissions
+        // Currently simplified to domain-based access
+        return false;
+    }
+    
+    /**
+     * Check if two users share the same email domain
+     */
+    private function sharesSameDomain(User $user, User $requester): bool
+    {
+        $userDomain = substr($user->email, strpos($user->email, '@') + 1);
+        $requesterDomain = substr($requester->email, strpos($requester->email, '@') + 1);
+        
+        // Check if both are from same educational/organizational domain
+        $educationalDomains = ['ac.uk', 'edu', 'edu.au', 'edu.in'];
+        foreach ($educationalDomains as $eduDomain) {
+            if (str_ends_with($userDomain, $eduDomain) && $userDomain === $requesterDomain) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Check if context is marked as private
+     */
+    private function isPrivateContext(Context $context): bool
+    {
+        // Specific private contexts
+        $privateContexts = ['private', 'confidential', 'internal'];
+        if (in_array($context->slug, $privateContexts)) {
+            return true;
+        }
+        
+        // Check if all attributes in context are private
+        return $context->profileValues()
+            ->where('visibility', '!=', 'private')
+            ->doesntExist();
     }
 
     private function formatProfileData($profileValues): array

@@ -7,9 +7,11 @@ use App\Http\Controllers\ProfileViewController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Authentication routes
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+// Authentication routes with rate limiting
+Route::middleware(['throttle:auth'])->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+});
 
 // Protected authentication routes (supports both session and sanctum)
 Route::middleware(['auth:sanctum,web'])->group(function () {
@@ -32,11 +34,14 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
     Route::put('/contexts/{contextId}/attributes/{attributeId}', [ContextController::class, 'updateAttribute'])->whereNumber('contextId')->whereNumber('attributeId');
     Route::delete('/contexts/{contextId}/attributes/{attributeId}', [ContextController::class, 'destroyAttribute'])->whereNumber('contextId')->whereNumber('attributeId');
 
-    // GDPR Compliance
-    Route::get('/export-data', [GDPRController::class, 'exportData']);
+    // GDPR Compliance with specific rate limiting
+    Route::middleware(['throttle:gdpr'])->group(function () {
+        Route::get('/export-data', [GDPRController::class, 'exportData']);
+        Route::delete('/delete-account', [GDPRController::class, 'deleteAccount']);
+    });
+    
     Route::get('/audit-log', [GDPRController::class, 'getAuditLog']);
     Route::get('/gdpr-info', [GDPRController::class, 'getGDPRInfo']);
-    Route::delete('/delete-account', [GDPRController::class, 'deleteAccount']);
 });
 
 // Profile viewing (supports both authenticated and unauthenticated access)

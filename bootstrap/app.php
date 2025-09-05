@@ -12,7 +12,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // API throttling
+        $middleware->api(append: [
+            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
+        ]);
+        
+        // Security headers
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
