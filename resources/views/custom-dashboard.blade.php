@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Identity & Profile Management Dashboard') }}
         </h2>
     </x-slot>
@@ -9,18 +9,18 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             
             <!-- Welcome Section -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <h3 class="text-2xl font-bold mb-2">Welcome, {{ $user->name }}!</h3>
-                    <p class="text-gray-600">Manage your contexts and profile attributes below.</p>
+                    <p class="text-gray-600 dark:text-gray-400">Manage your contexts and profile attributes below.</p>
                 </div>
             </div>
 
             <!-- Contexts Overview -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-semibold text-gray-900">Your Contexts</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Your Contexts</h3>
                         <button @click="showCreateModal = true"
                                 class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                             Create New Context
@@ -29,37 +29,37 @@
 
                     @if(count($contexts) > 0)
                         <!-- Pagination Info -->
-                        <div class="mb-4 text-sm text-gray-700">
+                        <div class="mb-4 text-sm text-gray-700 dark:text-gray-300">
                             Showing {{ $contextsPagination['from'] }} to {{ $contextsPagination['to'] }} 
                             of {{ $contextsPagination['total'] }} contexts
                         </div>
                         
                         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                             @foreach($contexts as $context)
-                                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow dark:hover:shadow-gray-700/50">
                                     <div class="flex justify-between items-start mb-2">
-                                        <h4 class="font-medium text-gray-900">{{ $context->name }}</h4>
+                                        <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ $context->name }}</h4>
                                         @if($context->is_default)
-                                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Default</span>
+                                            <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs px-2 py-1 rounded-full">Default</span>
                                         @endif
                                     </div>
-                                    <p class="text-sm text-gray-600 mb-2">{{ $context->slug }}</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">{{ $context->slug }}</p>
                                     @if($context->description)
-                                        <p class="text-sm text-gray-500 mb-3">{{ $context->description }}</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">{{ $context->description }}</p>
                                     @endif
 
-                                    <div class="text-xs text-gray-500 mb-3">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-3">
                                         {{ $context->profile_values_count ?? 0 }} attributes
                                     </div>
 
                                     <div class="flex space-x-2">
                                         <button @click="viewContext({{ $context->id }})"
-                                                class="text-blue-600 hover:text-blue-800 text-sm">View</button>
+                                                class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm">View</button>
                                         <button @click="editContext({{ $context->id }})"
-                                                class="text-green-600 hover:text-green-800 text-sm">Edit</button>
+                                                class="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 text-sm">Edit</button>
                                         @if(!$context->is_default)
                                             <button @click="deleteContext({{ $context->id }})"
-                                                    class="text-red-600 hover:text-red-800 text-sm">Delete</button>
+                                                    class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm">Delete</button>
                                         @endif
                                     </div>
                                 </div>
@@ -71,11 +71,11 @@
                             <div class="mt-6 flex items-center justify-between">
                                 @if($contextsPagination['current_page'] > 1)
                                     <a href="{{ request()->fullUrlWithQuery(['page' => $contextsPagination['current_page'] - 1]) }}"
-                                       class="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white font-medium text-gray-700 hover:bg-gray-50">
+                                       class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600">
                                         Previous
                                     </a>
                                 @else
-                                    <button disabled class="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white font-medium text-gray-700 opacity-50 cursor-not-allowed">
+                                    <button disabled class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 opacity-50 cursor-not-allowed">
                                         Previous
                                     </button>
                                 @endif
@@ -83,14 +83,14 @@
                                 <div class="flex gap-1">
                                     @for($i = 1; $i <= min(5, $contextsPagination['last_page']); $i++)
                                         <a href="{{ request()->fullUrlWithQuery(['page' => $i]) }}"
-                                           class="px-3 py-2 text-sm border border-gray-300 rounded-md font-medium {{ $i == $contextsPagination['current_page'] ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
+                                           class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md font-medium {{ $i == $contextsPagination['current_page'] ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600' }}">
                                             {{ $i }}
                                         </a>
                                     @endfor
                                     @if($contextsPagination['last_page'] > 5)
                                         <span class="px-3 py-2 text-sm">...</span>
                                         <a href="{{ request()->fullUrlWithQuery(['page' => $contextsPagination['last_page']]) }}"
-                                           class="px-3 py-2 text-sm border border-gray-300 rounded-md font-medium {{ $contextsPagination['last_page'] == $contextsPagination['current_page'] ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
+                                           class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md font-medium {{ $contextsPagination['last_page'] == $contextsPagination['current_page'] ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600' }}">
                                             {{ $contextsPagination['last_page'] }}
                                         </a>
                                     @endif
@@ -98,11 +98,11 @@
                                 
                                 @if($contextsPagination['current_page'] < $contextsPagination['last_page'])
                                     <a href="{{ request()->fullUrlWithQuery(['page' => $contextsPagination['current_page'] + 1]) }}"
-                                       class="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white font-medium text-gray-700 hover:bg-gray-50">
+                                       class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600">
                                         Next
                                     </a>
                                 @else
-                                    <button disabled class="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white font-medium text-gray-700 opacity-50 cursor-not-allowed">
+                                    <button disabled class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 opacity-50 cursor-not-allowed">
                                         Next
                                     </button>
                                 @endif
@@ -110,7 +110,7 @@
                         @endif
                     @else
                         <div class="text-center py-8">
-                            <div class="text-gray-500 mb-4">You don't have any contexts yet.</div>
+                            <div class="text-gray-500 dark:text-gray-400 mb-4">You don't have any contexts yet.</div>
                             <button @click="showCreateModal = true"
                                     class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md">
                                 Create Your First Context
@@ -121,14 +121,14 @@
             </div>
 
             <!-- API Demo Section -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">API Demo</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">API Demo</h3>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Test Profile Retrieval</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Test Profile Retrieval</label>
                             <div class="flex space-x-2">
-                                <select x-model="testUserId" class="border border-gray-300 rounded px-3 py-2">
+                                <select x-model="testUserId" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded px-3 py-2">
                                     <option value="{{ $user->id }}">Your Profile ({{ $user->name }})</option>
                                     @if($user->id != 1)
                                         <option value="1">Arda's Profile</option>
@@ -137,7 +137,7 @@
                                         <option value="2">Elif's Profile</option>
                                     @endif
                                 </select>
-                                <select x-model="testContext" class="border border-gray-300 rounded px-3 py-2">
+                                <select x-model="testContext" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded px-3 py-2">
                                     <option value="">Default Context</option>
                                     <option value="university">University</option>
                                     <option value="gaming">Gaming</option>
@@ -154,16 +154,16 @@
                             </div>
                         </div>
                         <div>
-                            <pre x-show="apiResult" x-text="apiResult" class="bg-gray-100 p-4 rounded text-sm overflow-auto max-h-64 text-gray-800"></pre>
+                            <pre x-show="apiResult" x-text="apiResult" class="bg-gray-100 dark:bg-gray-900 p-4 rounded text-sm overflow-auto max-h-64 text-gray-800 dark:text-gray-200"></pre>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- GDPR Controls -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">GDPR Controls</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">GDPR Controls</h3>
                     <div class="space-y-4">
                         <div class="flex flex-col sm:flex-row gap-4">
                             <button @click="exportData"
@@ -191,20 +191,20 @@
         <!-- View Context Modal -->
         <x-alpine-modal show="showViewModal" max-width="lg">
             <x-slot name="header">
-                <h3 class="text-lg font-medium text-gray-900 mb-4" x-text="viewingContext ? viewingContext.name + ' Context' : ''"></h3>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4" x-text="viewingContext ? viewingContext.name + ' Context' : ''"></h3>
             </x-slot>
 
             <div class="space-y-4">
                 <div>
-                    <p class="text-sm text-gray-600">Slug: <span x-text="viewingContext?.slug"></span></p>
-                    <p x-show="viewingContext?.description" class="text-sm text-gray-600">Description: <span x-text="viewingContext?.description"></span></p>
-                    <p class="text-sm text-gray-600">Default: <span x-text="viewingContext?.is_default ? 'Yes' : 'No'"></span></p>
-                    <p class="text-sm text-gray-600">Active: <span x-text="viewingContext?.is_active ? 'Yes' : 'No'"></span></p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Slug: <span x-text="viewingContext?.slug"></span></p>
+                    <p x-show="viewingContext?.description" class="text-sm text-gray-600 dark:text-gray-400">Description: <span x-text="viewingContext?.description"></span></p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Default: <span x-text="viewingContext?.is_default ? 'Yes' : 'No'"></span></p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Active: <span x-text="viewingContext?.is_active ? 'Yes' : 'No'"></span></p>
                 </div>
 
                 <div>
                     <div class="flex justify-between items-center mb-2">
-                        <h4 class="font-medium text-gray-900">Attributes</h4>
+                        <h4 class="font-medium text-gray-900 dark:text-gray-100">Attributes</h4>
                         <button @click="addAttribute"
                                 class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">
                             Add Attribute
@@ -213,31 +213,31 @@
                     <template x-if="viewingContext?.attributes && viewingContext.attributes.length > 0">
                         <ul class="space-y-2">
                             <template x-for="attr in viewingContext.attributes" :key="attr.id">
-                                <li class="bg-gray-50 p-3 rounded flex justify-between items-center">
+                                <li class="bg-gray-50 dark:bg-gray-700 p-3 rounded flex justify-between items-center">
                                     <div>
                                         <span class="font-medium" x-text="attr.attribute.display_name"></span>:
                                         <span x-text="attr.value"></span>
-                                        <span class="text-xs text-gray-500">(<span x-text="attr.visibility"></span>)</span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">(<span x-text="attr.visibility"></span>)</span>
                                     </div>
                                     <div class="flex space-x-2">
                                         <button @click="editAttribute(attr)"
-                                                class="text-xs text-blue-600 hover:text-blue-800">Edit</button>
+                                                class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">Edit</button>
                                         <button @click="deleteAttribute(attr.id)"
-                                                class="text-xs text-red-600 hover:text-red-800">Delete</button>
+                                                class="text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Delete</button>
                                     </div>
                                 </li>
                             </template>
                         </ul>
                     </template>
                     <template x-else>
-                        <p class="text-gray-500">No attributes defined</p>
+                        <p class="text-gray-500 dark:text-gray-400">No attributes defined</p>
                     </template>
                 </div>
             </div>
 
             <x-slot name="footer">
                 <button type="button" @click="showViewModal = false"
-                        class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        class="w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">
                     Close
                 </button>
             </x-slot>
@@ -247,38 +247,38 @@
         <x-alpine-modal show="showEditModal" max-width="lg" title="Edit Context">
             <x-slot name="body">
                 <form @submit.prevent="updateContext">
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Name</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
                                 <input type="text" x-model="editingContext.name" required
-                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Slug</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Slug</label>
                                 <input type="text" x-model="editingContext.slug" required
                                        pattern="[a-z0-9-]+"
                                        title="Only lowercase letters, numbers, and hyphens"
-                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Description</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                                 <textarea x-model="editingContext.description" rows="3"
-                                          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                          class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400"></textarea>
                             </div>
                             <div>
                                 <label class="flex items-center">
                                     <input type="checkbox" x-model="editingContext.is_active"
-                                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                    <span class="ml-2 text-sm text-gray-700">Active</span>
+                                           class="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400">
+                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Active</span>
                                 </label>
                             </div>
                         </div>
 
-                        <div x-show="editError" x-text="editError" class="mt-2 text-red-600 text-sm"></div>
+                        <div x-show="editError" x-text="editError" class="mt-2 text-red-600 dark:text-red-400 text-sm"></div>
                     </div>
 
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                         <button type="submit"
                                 :disabled="editLoading"
                                 :class="editLoading ? 'opacity-50 cursor-not-allowed' : ''"
@@ -299,32 +299,32 @@
         <x-alpine-modal show="showAddAttributeModal" max-width="lg" title="Add New Attribute">
             <x-slot name="body">
                 <form @submit.prevent="storeAttribute">
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Key Name</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Key Name</label>
                                 <input type="text" x-model="newAttribute.key_name" required
                                        pattern="[a-z0-9_]+"
                                        title="Only lowercase letters, numbers, and underscores"
                                        placeholder="e.g., full_name, email, phone_number"
-                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Display Name</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Display Name</label>
                                 <input type="text" x-model="newAttribute.display_name" required
                                        placeholder="e.g., Full Name, Email Address, Phone Number"
-                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Value</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Value</label>
                                 <input type="text" x-model="newAttribute.value" required
                                        placeholder="Enter the attribute value"
-                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Data Type</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Data Type</label>
                                 <select x-model="newAttribute.data_type" required
-                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400">
                                     <option value="string">String</option>
                                     <option value="email">Email</option>
                                     <option value="url">URL</option>
@@ -334,9 +334,9 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Visibility</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Visibility</label>
                                 <select x-model="newAttribute.visibility" required
-                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400">
                                     <option value="private">Private (only owner can see)</option>
                                     <option value="protected">Protected (authenticated users)</option>
                                     <option value="public">Public (everyone can see)</option>
@@ -344,10 +344,10 @@
                             </div>
                         </div>
 
-                        <div x-show="addAttributeError" x-text="addAttributeError" class="mt-2 text-red-600 text-sm"></div>
+                        <div x-show="addAttributeError" x-text="addAttributeError" class="mt-2 text-red-600 dark:text-red-400 text-sm"></div>
                     </div>
 
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                         <button type="submit"
                                 :disabled="addAttributeLoading"
                                 :class="addAttributeLoading ? 'opacity-50 cursor-not-allowed' : ''"
@@ -368,18 +368,18 @@
         <x-alpine-modal show="showEditAttributeModal" max-width="lg" title="Edit Attribute">
             <x-slot name="body">
                 <form @submit.prevent="updateAttribute">
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Value</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Value</label>
                                 <input type="text" x-model="editingAttribute.value" required
                                        placeholder="Enter the new value"
-                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Visibility</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Visibility</label>
                                 <select x-model="editingAttribute.visibility" required
-                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400">
                                     <option value="private">Private (only owner can see)</option>
                                     <option value="protected">Protected (authenticated users)</option>
                                     <option value="public">Public (everyone can see)</option>
@@ -387,10 +387,10 @@
                             </div>
                         </div>
 
-                        <div x-show="editAttributeError" x-text="editAttributeError" class="mt-2 text-red-600 text-sm"></div>
+                        <div x-show="editAttributeError" x-text="editAttributeError" class="mt-2 text-red-600 dark:text-red-400 text-sm"></div>
                     </div>
 
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                         <button type="submit"
                                 :disabled="editAttributeLoading"
                                 :class="editAttributeLoading ? 'opacity-50 cursor-not-allowed' : ''"
@@ -424,31 +424,31 @@
         <x-alpine-modal show="showCreateModal" max-width="lg" title="Create New Context">
             <x-slot name="body">
                 <form @submit.prevent="createContext">
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <div class="space-y-4">
                             <div>
-                                <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
                                 <input type="text" x-model="newContext.name" required
-                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400">
                             </div>
                             <div>
-                                <label for="slug" class="block text-sm font-medium text-gray-700">Slug</label>
+                                <label for="slug" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Slug</label>
                                 <input type="text" x-model="newContext.slug" required
                                        pattern="[a-z0-9-]+"
                                        title="Only lowercase letters, numbers, and hyphens"
-                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400">
                             </div>
                             <div>
-                                <label for="description" class="block text-sm font-medium text-gray-700">Description (optional)</label>
+                                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description (optional)</label>
                                 <textarea x-model="newContext.description" rows="3"
-                                          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                          class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400"></textarea>
                             </div>
                         </div>
 
-                        <div x-show="createError" x-text="createError" class="mt-2 text-red-600 text-sm"></div>
+                        <div x-show="createError" x-text="createError" class="mt-2 text-red-600 dark:text-red-400 text-sm"></div>
                     </div>
 
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                         <button type="submit"
                                 :disabled="createLoading"
                                 :class="createLoading ? 'opacity-50 cursor-not-allowed' : ''"

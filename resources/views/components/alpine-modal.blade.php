@@ -41,7 +41,7 @@ $maxWidth = [
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
              @click="{{ $show }} = false"
-             class="fixed inset-0 bg-gray-500 bg-opacity-75"></div>
+             class="fixed inset-0 bg-black/50 dark:bg-black/60"></div>
 
         <!-- Modal panel -->
         <div x-show="{{ $show }}"
@@ -51,12 +51,12 @@ $maxWidth = [
              x-transition:leave="ease-in duration-200"
              x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
              x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             class="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle {{ $maxWidth }} sm:w-full">
+             class="relative inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle {{ $maxWidth }} sm:w-full">
             
             @if($title || isset($header))
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     @if($title)
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">{{ $title }}</h3>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ $title }}</h3>
                     @endif
                     @isset($header)
                         {{ $header }}
@@ -68,14 +68,14 @@ $maxWidth = [
             @if(isset($body))
                 {{ $body }}
             @else
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     {{ $slot }}
                 </div>
             @endif
             
             <!-- Modal footer -->
             @isset($footer)
-                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                     {{ $footer }}
                 </div>
             @endisset
