@@ -15,6 +15,18 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('api-demo')" :active="request()->routeIs('api-demo')">
+                        {{ __('API Demo') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('gdpr-controls')" :active="request()->routeIs('gdpr-controls')">
+                        {{ __('GDPR Controls') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('scramble.docs.ui')" :active="request()->routeIs('scramble.docs.*')" target="_blank">
+                        {{ __('API Docs') }}
+                        <svg class="w-3 h-3 ml-1 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -75,6 +87,18 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('api-demo')" :active="request()->routeIs('api-demo')">
+                {{ __('API Demo') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('gdpr-controls')" :active="request()->routeIs('gdpr-controls')">
+                {{ __('GDPR Controls') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('scramble.docs.ui')" :active="request()->routeIs('scramble.docs.*')" target="_blank">
+                {{ __('API Docs') }}
+                <svg class="w-3 h-3 ml-1 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                </svg>
             </x-responsive-nav-link>
         </div>
 
