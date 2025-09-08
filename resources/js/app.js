@@ -1,9 +1,5 @@
 import './bootstrap';
 
-import Alpine from 'alpinejs';
-
-window.Alpine = Alpine;
-
 // Initialize theme on page load
 document.addEventListener('DOMContentLoaded', () => {
     // Check localStorage for theme preference
@@ -13,5 +9,3 @@ document.addEventListener('DOMContentLoaded', () => {
         document.documentElement.classList.remove('dark');
     }
 });
-
-Alpine.start();
