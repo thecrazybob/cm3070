@@ -3,12 +3,14 @@
 namespace App\Providers;
 
 use App\Models\Context;
+use Dedoc\Scramble\Scramble;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +29,16 @@ class AppServiceProvider extends ServiceProvider
     {
         ResetPassword::createUrlUsing(function (object $notifiable, string $token) {
             return config('app.frontend_url')."/password-reset/$token?email={$notifiable->getEmailForPasswordReset()}";
+        });
+
+        // Configure Scramble to only document actual API routes (excluding /api-demo)
+        Scramble::routes(function (\Illuminate\Routing\Route $route) {
+            // Get the URI of the route
+            $uri = $route->uri();
+            
+            // Only include routes that start with 'api/' (not 'api-')
+            // This excludes /api-demo while including all /api/* routes
+            return Str::startsWith($uri, 'api/');
         });
 
         // Configure rate limiting
