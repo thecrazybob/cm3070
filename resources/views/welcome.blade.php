@@ -36,7 +36,7 @@
                         </div>
                         <div class="flex items-center space-x-4">
                             <!-- Theme Toggle -->
-                            <x-theme-toggle />
+                            <x-theme-toggle-vanilla />
 
                             @if (Route::has('login'))
                                 @auth

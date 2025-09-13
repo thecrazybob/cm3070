@@ -27,6 +27,7 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
     Route::get('/contexts/{contextId}', [ContextController::class, 'show'])->whereNumber('contextId');
     Route::put('/contexts/{contextId}', [ContextController::class, 'update'])->whereNumber('contextId');
     Route::delete('/contexts/{contextId}', [ContextController::class, 'destroy'])->whereNumber('contextId');
+    Route::post('/contexts/{contextId}/set-default', [ContextController::class, 'setDefault'])->whereNumber('contextId');
 
     // Context Attributes Management
     Route::get('/contexts/{contextId}/attributes', [ContextController::class, 'getAttributes'])->whereNumber('contextId');

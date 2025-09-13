@@ -5,65 +5,73 @@ namespace App\Livewire;
 use App\Models\Context;
 use App\Models\ContextProfileValue;
 use App\Models\ProfileAttribute;
+use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
-use Filament\Schemas\Concerns\InteractsWithSchemas;
-use Filament\Schemas\Contracts\HasSchemas;
-use Filament\Schemas\Schema;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Str;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-class ManageAttribute extends Component implements HasSchemas, HasActions
+class ManageAttribute extends Component implements HasForms, HasActions
 {
-    use InteractsWithSchemas;
+    use InteractsWithForms;
     use InteractsWithActions;
     
-    public bool $showModal = false;
     public ?ContextProfileValue $editingAttribute = null;
     public ?Context $context = null;
-    public string $modalTitle = 'Add New Attribute';
-    public string $submitButtonText = 'Add Attribute';
-    
-    // Form data property
-    public ?array $data = [];
 
-    public function mount(): void
+    #[On('open-add-attribute-modal')]
+    public function openAddModal(int $contextId): void
     {
-        $this->form->fill();
+        $this->context = Context::where('user_id', auth()->id())
+            ->findOrFail($contextId);
+        
+        $this->editingAttribute = null;
+        $this->mountAction('addAttribute');
     }
 
-    public function form(Schema $schema): Schema
+    #[On('open-edit-attribute-modal')]
+    public function openEditModal(int $attributeId): void
     {
-        return $schema
-            ->components([
+        $this->editingAttribute = ContextProfileValue::where('user_id', auth()->id())
+            ->with(['attribute', 'context'])
+            ->findOrFail($attributeId);
+        
+        $this->context = $this->editingAttribute->context;
+        $this->mountAction('editAttribute');
+    }
+
+    public function addAttributeAction(): Action
+    {
+        return Action::make('addAttribute')
+            ->modalHeading('Add New Attribute')
+            ->form([
                 TextInput::make('key_name')
                     ->label('Key Name')
                     ->required()
                     ->maxLength(255)
                     ->regex('/^[a-z0-9_]+$/')
                     ->helperText('Lowercase letters, numbers, and underscores only (e.g., full_name, email, phone_number)')
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(function (Get $get, Set $set, ?string $state) {
-                        if (!$this->editingAttribute && filled($state)) {
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        if (filled($state)) {
                             // Auto-generate display name from key name
                             $displayName = Str::title(str_replace('_', ' ', $state));
                             $set('display_name', $displayName);
                         }
-                    })
-                    ->disabled(fn () => $this->editingAttribute !== null),
+                    }),
                     
                 TextInput::make('display_name')
                     ->label('Display Name')
                     ->required()
                     ->maxLength(255)
-                    ->helperText('Human-readable name (e.g., Full Name, Email Address, Phone Number)')
-                    ->disabled(fn () => $this->editingAttribute !== null),
+                    ->helperText('Human-readable name (e.g., Full Name, Email Address, Phone Number)'),
                     
                 Select::make('data_type')
                     ->label('Data Type')
@@ -75,18 +83,18 @@ class ManageAttribute extends Component implements HasSchemas, HasActions
                         'phone' => 'Phone',
                         'number' => 'Number',
                         'date' => 'Date',
+                        'text' => 'Text',
                     ])
                     ->default('string')
                     ->helperText('Select the type of data this attribute will store')
-                    ->disabled(fn () => $this->editingAttribute !== null)
-                    ->live(),
+                    ->reactive(),
                     
                 Textarea::make('value')
                     ->label('Value')
                     ->required()
                     ->maxLength(1000)
                     ->rows(2)
-                    ->helperText(function (Get $get) {
+                    ->helperText(function (callable $get) {
                         $type = $get('data_type') ?? 'string';
                         return match($type) {
                             'email' => 'Enter a valid email address',
@@ -109,68 +117,7 @@ class ManageAttribute extends Component implements HasSchemas, HasActions
                     ->default('private')
                     ->helperText('Control who can view this attribute'),
             ])
-            ->statePath('data')
-            ->model($this->editingAttribute ?? ContextProfileValue::class);
-    }
-
-    #[On('open-add-attribute-modal')]
-    public function openAddModal(int $contextId): void
-    {
-        $this->context = Context::where('user_id', auth()->id())
-            ->findOrFail($contextId);
-        
-        $this->editingAttribute = null;
-        $this->modalTitle = 'Add New Attribute';
-        $this->submitButtonText = 'Add Attribute';
-        
-        $this->form->fill([
-            'key_name' => '',
-            'display_name' => '',
-            'value' => '',
-            'data_type' => 'string',
-            'visibility' => 'private',
-        ]);
-        
-        $this->showModal = true;
-    }
-
-    #[On('open-edit-attribute-modal')]
-    public function openEditModal(int $attributeId): void
-    {
-        $this->editingAttribute = ContextProfileValue::where('user_id', auth()->id())
-            ->with(['attribute', 'context'])
-            ->findOrFail($attributeId);
-        
-        $this->context = $this->editingAttribute->context;
-        
-        $this->modalTitle = 'Edit Attribute';
-        $this->submitButtonText = 'Update';
-        
-        $this->form->fill([
-            'key_name' => $this->editingAttribute->attribute->key_name,
-            'display_name' => $this->editingAttribute->attribute->display_name,
-            'data_type' => $this->editingAttribute->attribute->data_type,
-            'value' => $this->editingAttribute->value,
-            'visibility' => $this->editingAttribute->visibility,
-        ]);
-        
-        $this->showModal = true;
-    }
-
-    public function submit(): void
-    {
-        try {
-            $data = $this->form->getState();
-            
-            if ($this->editingAttribute) {
-                // Update existing attribute value and visibility
-                $this->editingAttribute->update([
-                    'value' => $data['value'],
-                    'visibility' => $data['visibility'],
-                ]);
-                
-                session()->flash('success', 'Attribute updated successfully');
-            } else {
+            ->action(function (array $data): void {
                 // Find or create ProfileAttribute
                 $profileAttribute = ProfileAttribute::firstOrCreate(
                     [
@@ -185,6 +132,20 @@ class ManageAttribute extends Component implements HasSchemas, HasActions
                     ]
                 );
                 
+                // Check if this attribute already exists for this context
+                $existingValue = ContextProfileValue::where('context_id', $this->context->id)
+                    ->where('attribute_id', $profileAttribute->id)
+                    ->first();
+                
+                if ($existingValue) {
+                    Notification::make()
+                        ->title('Attribute already exists')
+                        ->body('This attribute already exists for this context. Please edit it instead.')
+                        ->danger()
+                        ->send();
+                    return;
+                }
+                
                 // Create ContextProfileValue
                 ContextProfileValue::create([
                     'user_id' => auth()->id(),
@@ -194,17 +155,85 @@ class ManageAttribute extends Component implements HasSchemas, HasActions
                     'visibility' => $data['visibility'],
                 ]);
                 
-                session()->flash('success', 'Attribute added successfully');
-            }
-            
-            $this->closeModal();
-            
-            // Refresh the page to show the new/updated attribute
-            $this->redirect(route('dashboard'));
-            
-        } catch (\Exception $e) {
-            session()->flash('error', 'Error saving attribute: ' . $e->getMessage());
-        }
+                Notification::make()
+                    ->title('Attribute added successfully')
+                    ->success()
+                    ->send();
+                
+                // Dispatch event to refresh context data without closing modal
+                $this->dispatch('attribute-added', contextId: $this->context->id);
+            })
+            ->modalButton('Add Attribute')
+            ->modalCancelActionLabel('Cancel');
+    }
+
+    public function editAttributeAction(): Action
+    {
+        return Action::make('editAttribute')
+            ->modalHeading('Edit Attribute')
+            ->fillForm(fn () => $this->editingAttribute ? [
+                'key_name' => $this->editingAttribute->attribute->key_name,
+                'display_name' => $this->editingAttribute->attribute->display_name,
+                'data_type' => $this->editingAttribute->attribute->data_type,
+                'value' => $this->editingAttribute->value,
+                'visibility' => $this->editingAttribute->visibility,
+            ] : [])
+            ->form([
+                TextInput::make('key_name')
+                    ->label('Key Name')
+                    ->disabled()
+                    ->helperText('Key name cannot be changed'),
+                    
+                TextInput::make('display_name')
+                    ->label('Display Name')
+                    ->disabled()
+                    ->helperText('Display name cannot be changed'),
+                    
+                Select::make('data_type')
+                    ->label('Data Type')
+                    ->disabled()
+                    ->options([
+                        'string' => 'String',
+                        'email' => 'Email',
+                        'url' => 'URL',
+                        'phone' => 'Phone',
+                        'number' => 'Number',
+                        'date' => 'Date',
+                        'text' => 'Text',
+                    ]),
+                    
+                Textarea::make('value')
+                    ->label('Value')
+                    ->required()
+                    ->maxLength(1000)
+                    ->rows(2),
+                    
+                Select::make('visibility')
+                    ->label('Visibility')
+                    ->required()
+                    ->options([
+                        'private' => 'Private (only owner can see)',
+                        'protected' => 'Protected (authenticated users)',
+                        'public' => 'Public (everyone can see)',
+                    ])
+                    ->helperText('Control who can view this attribute'),
+            ])
+            ->action(function (array $data): void {
+                $this->editingAttribute->update([
+                    'value' => $data['value'],
+                    'visibility' => $data['visibility'],
+                ]);
+                
+                Notification::make()
+                    ->title('Attribute updated successfully')
+                    ->success()
+                    ->send();
+                
+                // Dispatch event to refresh context data
+                $this->dispatch('attribute-updated', contextId: $this->context->id);
+            })
+            ->modalButton('Update')
+            ->modalCancelActionLabel('Cancel');
     }
 
     protected function getValidationRules(string $dataType): array
@@ -217,14 +246,6 @@ class ManageAttribute extends Component implements HasSchemas, HasActions
             'date' => ['date'],
             default => ['string', 'max:1000'],
         };
-    }
-
-    public function closeModal(): void
-    {
-        $this->showModal = false;
-        $this->editingAttribute = null;
-        $this->context = null;
-        $this->form->fill();
     }
 
     public function render()

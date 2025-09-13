@@ -7,7 +7,7 @@
 @php
 $maxWidth = [
     'sm' => 'sm:max-w-sm',
-    'md' => 'sm:max-w-md', 
+    'md' => 'sm:max-w-md',
     'lg' => 'sm:max-w-lg',
     'xl' => 'sm:max-w-xl',
     '2xl' => 'sm:max-w-2xl',
@@ -30,8 +30,8 @@ $maxWidth = [
      @keydown.escape.window="{{ $show }} = false"
      class="fixed inset-0 z-50 overflow-y-auto"
      {{ $attributes }}>
-    
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <!-- Background overlay -->
         <div x-show="{{ $show }}"
              x-transition:enter="ease-out duration-300"
@@ -43,6 +43,8 @@ $maxWidth = [
              @click="{{ $show }} = false"
              class="fixed inset-0 bg-black/50 dark:bg-black/60"></div>
 
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
         <!-- Modal panel -->
         <div x-show="{{ $show }}"
              x-transition:enter="ease-out duration-300"
@@ -52,7 +54,7 @@ $maxWidth = [
              x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
              x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
              class="relative inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle {{ $maxWidth }} sm:w-full">
-            
+
             @if($title || isset($header))
                 <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     @if($title)
@@ -63,7 +65,7 @@ $maxWidth = [
                     @endisset
                 </div>
             @endif
-            
+
             <!-- Modal body -->
             @if(isset($body))
                 {{ $body }}
@@ -72,7 +74,7 @@ $maxWidth = [
                     {{ $slot }}
                 </div>
             @endif
-            
+
             <!-- Modal footer -->
             @isset($footer)
                 <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">

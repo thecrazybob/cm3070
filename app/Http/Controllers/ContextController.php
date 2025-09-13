@@ -338,4 +338,37 @@ class ContextController extends Controller
             'message' => 'Attribute deleted successfully',
         ]);
     }
+
+    /**
+     * Set a context as the default context for the user
+     */
+    public function setDefault(Request $request, int $contextId): JsonResponse
+    {
+        $context = Context::where('id', $contextId)
+            ->where('user_id', $request->user()->id)
+            ->first();
+        
+        if (! $context) {
+            return response()->json(['message' => 'Context not found'], 404);
+        }
+
+        // Remove default flag from all other contexts
+        Context::where('user_id', $request->user()->id)
+            ->where('id', '!=', $contextId)
+            ->update(['is_default' => false]);
+
+        // Set this context as default
+        $context->is_default = true;
+        $context->save();
+
+        return response()->json([
+            'message' => 'Default context updated successfully',
+            'context' => [
+                'id' => $context->id,
+                'name' => $context->name,
+                'slug' => $context->slug,
+                'is_default' => true,
+            ],
+        ]);
+    }
 }

@@ -96,18 +96,60 @@
             </div>
 
             <!-- GDPR Information Modal -->
-            <div x-show="showGDPRInfoModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
-                <div class="flex items-center justify-center min-h-screen px-4">
-                    <div @click="showGDPRInfoModal = false" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+            <div x-show="showGDPRInfoModal" 
+                 x-cloak
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @keydown.escape.window="showGDPRInfoModal = false"
+                 class="fixed inset-0 z-50 overflow-y-auto">
+                
+                <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <!-- Background overlay -->
+                    <div x-show="showGDPRInfoModal"
+                         x-transition:enter="ease-out duration-300"
+                         x-transition:enter-start="opacity-0"
+                         x-transition:enter-end="opacity-100"
+                         x-transition:leave="ease-in duration-200"
+                         x-transition:leave-start="opacity-100"
+                         x-transition:leave-end="opacity-0"
+                         @click="showGDPRInfoModal = false"
+                         class="fixed inset-0 bg-black/50 dark:bg-black/60"></div>
                     
-                    <div class="relative bg-white dark:bg-gray-800 rounded-lg max-w-3xl w-full max-h-[80vh] overflow-y-auto">
+                    <!-- This element is to trick the browser into centering the modal contents. -->
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    
+                    <!-- Modal panel -->
+                    <div x-show="showGDPRInfoModal"
+                         x-transition:enter="ease-out duration-300"
+                         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                         x-transition:leave="ease-in duration-200"
+                         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                         class="relative inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+                        
                         <div class="px-6 py-4 border-b dark:border-gray-700">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">GDPR Compliance Information</h3>
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">GDPR Compliance Information</h3>
+                                <button @click="showGDPRInfoModal = false"
+                                        class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                                    <span class="sr-only">Close</span>
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
-                        <div class="p-6">
+                        
+                        <div class="p-6 max-h-[60vh] overflow-y-auto">
                             <pre x-text="gdprInfo" class="bg-gray-100 dark:bg-gray-900 p-4 rounded text-sm overflow-auto text-gray-800 dark:text-gray-200"></pre>
                         </div>
-                        <div class="px-6 py-4 border-t dark:border-gray-700">
+                        
+                        <div class="px-6 py-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
                             <button @click="showGDPRInfoModal = false"
                                     class="w-full sm:w-auto px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
                                 Close
@@ -253,4 +295,8 @@
             }
         }
     </script>
+    
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 </x-app-layout>

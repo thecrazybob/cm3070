@@ -58,6 +58,8 @@
                                         <button onclick="Livewire.dispatch('open-edit-context-modal', { contextId: {{ $context->id }} })"
                                                 class="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 text-sm">Edit</button>
                                         @if(!$context->is_default)
+                                            <button @click="setDefaultContext({{ $context->id }})"
+                                                    class="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 text-sm">Set Default</button>
                                             <button @click="deleteContext({{ $context->id }})"
                                                     class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm">Delete</button>
                                         @endif
@@ -140,7 +142,7 @@
                 <div>
                     <div class="flex justify-between items-center mb-2">
                         <h4 class="font-medium text-gray-900 dark:text-gray-100">Attributes</h4>
-                        <button x-on:click="() => { Livewire.dispatch('open-add-attribute-modal', { contextId: viewingContext.id }) }"
+                        <button x-on:click="() => { showViewModal = false; Livewire.dispatch('open-add-attribute-modal', { contextId: viewingContext.id }) }"
                                 class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">
                             Add Attribute
                         </button>
@@ -150,12 +152,12 @@
                             <template x-for="attr in viewingContext.attributes" :key="attr.id">
                                 <li class="bg-gray-50 dark:bg-gray-700 p-3 rounded flex justify-between items-center">
                                     <div>
-                                        <span class="font-medium" x-text="attr.attribute.display_name"></span>:
-                                        <span x-text="attr.value"></span>
+                                        <span class="font-medium text-gray-900 dark:text-gray-100" x-text="attr.attribute.display_name"></span>:
+                                        <span class="text-gray-700 dark:text-gray-300" x-text="attr.value"></span>
                                         <span class="text-xs text-gray-500 dark:text-gray-400">(<span x-text="attr.visibility"></span>)</span>
                                     </div>
                                     <div class="flex space-x-2">
-                                        <button x-on:click="() => { Livewire.dispatch('open-edit-attribute-modal', { attributeId: attr.id }) }"
+                                        <button x-on:click="() => { showViewModal = false; Livewire.dispatch('open-edit-attribute-modal', { attributeId: attr.id }) }"
                                                 class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">Edit</button>
                                         <button @click="deleteAttribute(attr.id)"
                                                 class="text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Delete</button>
@@ -243,6 +245,18 @@
     <script>
         function dashboardApp() {
             return {
+                init() {
+                    // Listen for attribute added/updated events
+                    window.addEventListener('attribute-added', async (event) => {
+                        // Reload the context and reopen the modal
+                        await this.viewContext(event.detail.contextId);
+                    });
+                    
+                    window.addEventListener('attribute-updated', async (event) => {
+                        // Reload the context and reopen the modal
+                        await this.viewContext(event.detail.contextId);
+                    });
+                },
                 // Modal states
                 showViewModal: false,
                 showEditModal: false,
@@ -347,6 +361,28 @@
                         this.editError = error.message;
                     } finally {
                         this.editLoading = false;
+                    }
+                },
+
+                async setDefaultContext(id) {
+                    try {
+                        const response = await fetch(`/api/contexts/${id}/set-default`, {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                'Authorization': 'Bearer {{ session("api_token") }}'
+                            }
+                        });
+                        
+                        if (response.ok) {
+                            window.location.reload();
+                        } else {
+                            const result = await response.json();
+                            alert(result.message || 'Failed to set default context');
+                        }
+                    } catch (error) {
+                        alert('Failed to set default context: ' + error.message);
                     }
                 },
 
