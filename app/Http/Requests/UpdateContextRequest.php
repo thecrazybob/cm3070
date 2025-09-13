@@ -22,7 +22,7 @@ final class UpdateContextRequest extends FormRequest
      */
     public function rules(): array
     {
-        $context = $this->route('context');
+        $contextId = $this->route('contextId');
 
         return [
             'slug' => [
@@ -31,7 +31,7 @@ final class UpdateContextRequest extends FormRequest
                 'max:50',
                 'regex:/^[a-z0-9-]+$/',
                 Rule::unique('contexts')->where(fn ($query) => $query->where('user_id', $this->user()->id)
-                    ->where('id', '!=', $context->id)),
+                    ->where('id', '!=', $contextId)),
             ],
             'name' => ['sometimes', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],

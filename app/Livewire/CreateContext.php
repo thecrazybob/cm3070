@@ -118,9 +118,8 @@ final class CreateContext extends Component implements HasActions, HasForms
                     ->unique(
                         table: 'contexts',
                         column: 'slug',
-                        ignoreRecord: true,
+                        ignorable: $this->editingContext,
                         modifyRuleUsing: fn ($rule) => $rule->where('user_id', auth()->id())
-                            ->where('id', '!=', $this->editingContext?->id)
                     ),
 
                 Textarea::make('description')
