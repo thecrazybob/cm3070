@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\User;
@@ -39,7 +41,7 @@ test('accessing non existent context returns error response', function () {
     $response = $this->getJson("/api/view/profile/{$arda->id}?context=non-existent-context");
     $response->assertStatus(200)->assertJson([
         'error' => true,
-        'message' => "The requested context 'non-existent-context' does not exist for this user or is not accessible."
+        'message' => "The requested context 'non-existent-context' does not exist for this user or is not accessible.",
     ]);
 });
 

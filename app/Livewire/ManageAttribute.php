@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire;
 
 use App\Models\Context;
@@ -18,12 +20,13 @@ use Illuminate\Support\Str;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-class ManageAttribute extends Component implements HasForms, HasActions
+final class ManageAttribute extends Component implements HasActions, HasForms
 {
-    use InteractsWithForms;
     use InteractsWithActions;
-    
+    use InteractsWithForms;
+
     public ?ContextProfileValue $editingAttribute = null;
+
     public ?Context $context = null;
 
     #[On('open-add-attribute-modal')]
@@ -31,7 +34,7 @@ class ManageAttribute extends Component implements HasForms, HasActions
     {
         $this->context = Context::where('user_id', auth()->id())
             ->findOrFail($contextId);
-        
+
         $this->editingAttribute = null;
         $this->mountAction('addAttribute');
     }
@@ -42,8 +45,11 @@ class ManageAttribute extends Component implements HasForms, HasActions
         $this->editingAttribute = ContextProfileValue::where('user_id', auth()->id())
             ->with(['attribute', 'context'])
             ->findOrFail($attributeId);
-        
-        $this->context = $this->editingAttribute->context;
+
+        $context = $this->editingAttribute->context;
+        if ($context instanceof Context) {
+            $this->context = $context;
+        }
         $this->mountAction('editAttribute');
     }
 
@@ -66,13 +72,13 @@ class ManageAttribute extends Component implements HasForms, HasActions
                             $set('display_name', $displayName);
                         }
                     }),
-                    
+
                 TextInput::make('display_name')
                     ->label('Display Name')
                     ->required()
                     ->maxLength(255)
                     ->helperText('Human-readable name (e.g., Full Name, Email Address, Phone Number)'),
-                    
+
                 Select::make('data_type')
                     ->label('Data Type')
                     ->required()
@@ -88,7 +94,7 @@ class ManageAttribute extends Component implements HasForms, HasActions
                     ->default('string')
                     ->helperText('Select the type of data this attribute will store')
                     ->reactive(),
-                    
+
                 Textarea::make('value')
                     ->label('Value')
                     ->required()
@@ -96,7 +102,8 @@ class ManageAttribute extends Component implements HasForms, HasActions
                     ->rows(2)
                     ->helperText(function (callable $get) {
                         $type = $get('data_type') ?? 'string';
-                        return match($type) {
+
+                        return match ($type) {
                             'email' => 'Enter a valid email address',
                             'url' => 'Enter a valid URL (e.g., https://example.com)',
                             'phone' => 'Enter a phone number',
@@ -105,7 +112,7 @@ class ManageAttribute extends Component implements HasForms, HasActions
                             default => 'Enter the attribute value',
                         };
                     }),
-                    
+
                 Select::make('visibility')
                     ->label('Visibility')
                     ->required()
@@ -131,21 +138,22 @@ class ManageAttribute extends Component implements HasForms, HasActions
                         'validation_rules' => $this->getValidationRules($data['data_type']),
                     ]
                 );
-                
+
                 // Check if this attribute already exists for this context
                 $existingValue = ContextProfileValue::where('context_id', $this->context->id)
                     ->where('attribute_id', $profileAttribute->id)
                     ->first();
-                
+
                 if ($existingValue) {
                     Notification::make()
                         ->title('Attribute already exists')
                         ->body('This attribute already exists for this context. Please edit it instead.')
                         ->danger()
                         ->send();
+
                     return;
                 }
-                
+
                 // Create ContextProfileValue
                 ContextProfileValue::create([
                     'user_id' => auth()->id(),
@@ -154,12 +162,12 @@ class ManageAttribute extends Component implements HasForms, HasActions
                     'value' => $data['value'],
                     'visibility' => $data['visibility'],
                 ]);
-                
+
                 Notification::make()
                     ->title('Attribute added successfully')
                     ->success()
                     ->send();
-                
+
                 // Dispatch event to refresh context data without closing modal
                 $this->dispatch('attribute-added', contextId: $this->context->id);
             })
@@ -183,12 +191,12 @@ class ManageAttribute extends Component implements HasForms, HasActions
                     ->label('Key Name')
                     ->disabled()
                     ->helperText('Key name cannot be changed'),
-                    
+
                 TextInput::make('display_name')
                     ->label('Display Name')
                     ->disabled()
                     ->helperText('Display name cannot be changed'),
-                    
+
                 Select::make('data_type')
                     ->label('Data Type')
                     ->disabled()
@@ -201,13 +209,13 @@ class ManageAttribute extends Component implements HasForms, HasActions
                         'date' => 'Date',
                         'text' => 'Text',
                     ]),
-                    
+
                 Textarea::make('value')
                     ->label('Value')
                     ->required()
                     ->maxLength(1000)
                     ->rows(2),
-                    
+
                 Select::make('visibility')
                     ->label('Visibility')
                     ->required()
@@ -223,12 +231,12 @@ class ManageAttribute extends Component implements HasForms, HasActions
                     'value' => $data['value'],
                     'visibility' => $data['visibility'],
                 ]);
-                
+
                 Notification::make()
                     ->title('Attribute updated successfully')
                     ->success()
                     ->send();
-                
+
                 // Dispatch event to refresh context data
                 $this->dispatch('attribute-updated', contextId: $this->context->id);
             })
@@ -236,9 +244,14 @@ class ManageAttribute extends Component implements HasForms, HasActions
             ->modalCancelActionLabel('Cancel');
     }
 
+    public function render()
+    {
+        return view('livewire.manage-attribute');
+    }
+
     protected function getValidationRules(string $dataType): array
     {
-        return match($dataType) {
+        return match ($dataType) {
             'email' => ['email'],
             'url' => ['url'],
             'phone' => ['regex:/^[+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/'],
@@ -246,10 +259,5 @@ class ManageAttribute extends Component implements HasForms, HasActions
             'date' => ['date'],
             default => ['string', 'max:1000'],
         };
-    }
-
-    public function render()
-    {
-        return view('livewire.manage-attribute');
     }
 }

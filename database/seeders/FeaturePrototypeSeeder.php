@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\Context;
@@ -9,7 +11,7 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-class FeaturePrototypeSeeder extends Seeder
+final class FeaturePrototypeSeeder extends Seeder
 {
     /**
      * Run the database seeds.

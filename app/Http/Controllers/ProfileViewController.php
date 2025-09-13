@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\User;
@@ -9,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\PersonalAccessToken;
 
-class ProfileViewController extends Controller
+final class ProfileViewController extends Controller
 {
     protected ProfileRetrievalService $profileRetrievalService;
 
@@ -45,9 +47,9 @@ class ProfileViewController extends Controller
         // Handle optional authentication manually
         $authHeader = $request->header('Authorization');
         if ($authHeader && str_starts_with($authHeader, 'Bearer ')) {
-            $token = substr($authHeader, 7);
+            $token = mb_substr($authHeader, 7);
             $accessToken = PersonalAccessToken::findToken($token);
-            if ($accessToken) {
+            if ($accessToken && $accessToken->tokenable instanceof \Illuminate\Contracts\Auth\Authenticatable) {
                 Auth::setUser($accessToken->tokenable);
             }
         }

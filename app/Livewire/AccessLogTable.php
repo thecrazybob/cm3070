@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire;
 
 use App\Models\AccessLog;
@@ -17,12 +19,12 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Component;
 
-class AccessLogTable extends Component implements HasActions, HasForms, HasTable
+final class AccessLogTable extends Component implements HasActions, HasForms, HasTable
 {
     use InteractsWithActions;
     use InteractsWithForms;
     use InteractsWithTable;
-    
+
     public function table(Table $table): Table
     {
         return $table
@@ -36,19 +38,19 @@ class AccessLogTable extends Component implements HasActions, HasForms, HasTable
                     ->label('ID')
                     ->sortable()
                     ->searchable(),
-                    
+
                 TextColumn::make('created_at')
                     ->label('Date & Time')
                     ->dateTime('M j, Y H:i:s')
                     ->sortable()
                     ->searchable(),
-                    
+
                 TextColumn::make('context_requested')
                     ->label('Context Requested')
                     ->searchable()
                     ->wrap()
                     ->limit(50),
-                    
+
                 TextColumn::make('accessor_type')
                     ->label('Accessor Type')
                     ->searchable()
@@ -59,28 +61,29 @@ class AccessLogTable extends Component implements HasActions, HasForms, HasTable
                         'admin' => 'warning',
                         default => 'gray',
                     }),
-                    
+
                 TextColumn::make('attributes_returned')
                     ->label('Attributes')
                     ->wrap()
                     ->limit(100)
                     ->formatStateUsing(function ($state) {
-                        if (!$state) {
+                        if (! $state) {
                             return 'None';
                         }
                         $attributes = json_decode($state, true);
                         if (is_array($attributes)) {
                             return implode(', ', array_keys($attributes));
                         }
+
                         return $state;
                     }),
-                    
+
                 TextColumn::make('ip_address')
                     ->label('IP Address')
                     ->searchable()
                     ->copyable()
                     ->copyMessage('IP address copied'),
-                    
+
                 TextColumn::make('response_code')
                     ->label('Response')
                     ->badge()
@@ -103,7 +106,7 @@ class AccessLogTable extends Component implements HasActions, HasForms, HasTable
                         '404' => '404 Not Found',
                         '500' => '500 Server Error',
                     ]),
-                    
+
                 SelectFilter::make('accessor_type')
                     ->label('Accessor Type')
                     ->options([
@@ -111,7 +114,7 @@ class AccessLogTable extends Component implements HasActions, HasForms, HasTable
                         'web' => 'Web',
                         'admin' => 'Admin',
                     ]),
-                    
+
                 Filter::make('created_at')
                     ->form([
                         \Filament\Forms\Components\DatePicker::make('created_from')
@@ -133,11 +136,12 @@ class AccessLogTable extends Component implements HasActions, HasForms, HasTable
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
                         if ($data['created_from'] ?? null) {
-                            $indicators[] = 'From ' . \Carbon\Carbon::parse($data['created_from'])->toFormattedDateString();
+                            $indicators[] = 'From '.\Carbon\Carbon::parse($data['created_from'])->toFormattedDateString();
                         }
                         if ($data['created_until'] ?? null) {
-                            $indicators[] = 'Until ' . \Carbon\Carbon::parse($data['created_until'])->toFormattedDateString();
+                            $indicators[] = 'Until '.\Carbon\Carbon::parse($data['created_until'])->toFormattedDateString();
                         }
+
                         return $indicators;
                     }),
             ])
@@ -152,7 +156,7 @@ class AccessLogTable extends Component implements HasActions, HasForms, HasTable
             ->striped()
             ->poll('10s'); // Auto-refresh every 10 seconds
     }
-    
+
     public function render(): View
     {
         return view('livewire.access-log-table');

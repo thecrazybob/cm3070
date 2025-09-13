@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\AccessLog;
@@ -9,7 +11,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class ProfileRetrievalService
+final class ProfileRetrievalService
 {
     /**
      * Retrieves a user's profile based on the given context and requester.
@@ -51,10 +53,12 @@ class ProfileRetrievalService
     private function findContext(User $user, ?string $contextSlug): ?Context
     {
         if ($contextSlug) {
-            return $user->contexts()->where('slug', $contextSlug)->first();
+            $context = $user->contexts()->where('slug', $contextSlug)->first();
+            return $context instanceof Context ? $context : null;
         }
 
-        return $user->contexts()->where('is_default', true)->first();
+        $context = $user->contexts()->where('is_default', true)->first();
+        return $context instanceof Context ? $context : null;
     }
 
     private function getProfileValues(User $user, Context $context, bool $isOwner)
@@ -74,12 +78,12 @@ class ProfileRetrievalService
         if ($requester) {
             // Check if requester has any special access rules (simplified version)
             $hasSpecialAccess = $this->checkSpecialAccess($user, $context, $requester);
-            
+
             if ($hasSpecialAccess) {
                 // If user has special access, show public and protected attributes
                 return $query->whereIn('visibility', ['public', 'protected'])->get();
             }
-            
+
             // Check if this is a private context
             if ($this->isPrivateContext($context)) {
                 // For private contexts, return empty result for non-owners
@@ -93,7 +97,7 @@ class ProfileRetrievalService
         // Unauthenticated/public access - only public attributes
         return $query->where('visibility', 'public')->get();
     }
-    
+
     /**
      * Check if requester has special access permissions
      */
@@ -103,20 +107,20 @@ class ProfileRetrievalService
         if ($this->sharesSameDomain($user, $requester)) {
             return true;
         }
-        
+
         // Future: Check access_rules table for specific permissions
         // Currently simplified to domain-based access
         return false;
     }
-    
+
     /**
      * Check if two users share the same email domain
      */
     private function sharesSameDomain(User $user, User $requester): bool
     {
-        $userDomain = substr($user->email, strpos($user->email, '@') + 1);
-        $requesterDomain = substr($requester->email, strpos($requester->email, '@') + 1);
-        
+        $userDomain = mb_substr($user->email, mb_strpos($user->email, '@') + 1);
+        $requesterDomain = mb_substr($requester->email, mb_strpos($requester->email, '@') + 1);
+
         // Check if both are from same educational/organizational domain
         $educationalDomains = ['ac.uk', 'edu', 'edu.au', 'edu.in'];
         foreach ($educationalDomains as $eduDomain) {
@@ -124,10 +128,10 @@ class ProfileRetrievalService
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     /**
      * Check if context is marked as private
      */
@@ -138,7 +142,7 @@ class ProfileRetrievalService
         if (in_array($context->slug, $privateContexts)) {
             return true;
         }
-        
+
         // Check if all attributes in context are private
         return $context->profileValues()
             ->where('visibility', '!=', 'private')

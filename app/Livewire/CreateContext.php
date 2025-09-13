@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire;
 
 use App\Models\Context;
@@ -16,11 +18,11 @@ use Illuminate\Support\Str;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-class CreateContext extends Component implements HasForms, HasActions
+final class CreateContext extends Component implements HasActions, HasForms
 {
-    use InteractsWithForms;
     use InteractsWithActions;
-    
+    use InteractsWithForms;
+
     public ?Context $editingContext = null;
 
     #[On('open-create-context-modal')]
@@ -53,7 +55,7 @@ class CreateContext extends Component implements HasForms, HasActions
                             $set('slug', Str::slug($state));
                         }
                     }),
-                    
+
                 TextInput::make('slug')
                     ->label('Slug')
                     ->required()
@@ -67,12 +69,12 @@ class CreateContext extends Component implements HasForms, HasActions
                             return $rule->where('user_id', auth()->id());
                         }
                     ),
-                    
+
                 Textarea::make('description')
                     ->label('Description')
                     ->maxLength(500)
                     ->rows(3),
-                    
+
                 Toggle::make('is_active')
                     ->label('Active')
                     ->default(true)
@@ -81,12 +83,12 @@ class CreateContext extends Component implements HasForms, HasActions
             ->action(function (array $data): void {
                 $data['user_id'] = auth()->id();
                 Context::create($data);
-                
+
                 Notification::make()
                     ->title('Context created successfully')
                     ->success()
                     ->send();
-                
+
                 $this->redirect(route('dashboard'));
             })
             ->modalButton('Create')
@@ -108,7 +110,7 @@ class CreateContext extends Component implements HasForms, HasActions
                     ->label('Name')
                     ->required()
                     ->maxLength(255),
-                    
+
                 TextInput::make('slug')
                     ->label('Slug')
                     ->required()
@@ -124,24 +126,24 @@ class CreateContext extends Component implements HasForms, HasActions
                                 ->where('id', '!=', $this->editingContext?->id);
                         }
                     ),
-                    
+
                 Textarea::make('description')
                     ->label('Description')
                     ->maxLength(500)
                     ->rows(3),
-                    
+
                 Toggle::make('is_active')
                     ->label('Active')
                     ->helperText('Inactive contexts will not be available for selection'),
             ])
             ->action(function (array $data): void {
                 $this->editingContext->update($data);
-                
+
                 Notification::make()
                     ->title('Context updated successfully')
                     ->success()
                     ->send();
-                
+
                 $this->redirect(route('dashboard'));
             })
             ->modalButton('Update')

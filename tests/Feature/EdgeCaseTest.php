@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Context;
 use App\Models\ContextProfileValue;
-use App\Models\ProfileAttribute;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -21,9 +22,9 @@ beforeEach(function () {
 
 test('rejects attribute values over 1000 characters', function () {
     $this->actingAs($this->user);
-    
+
     $tooLongValue = str_repeat('a', 1001);
-    
+
     $response = $this->postJson("/api/contexts/{$this->context->id}/attributes", [
         'key_name' => 'bio',
         'value' => $tooLongValue,
@@ -36,9 +37,9 @@ test('rejects attribute values over 1000 characters', function () {
 
 test('handles special characters in attribute values', function () {
     $this->actingAs($this->user);
-    
+
     $specialValue = "Test 'quotes' \"double\" & symbols";
-    
+
     $response = $this->postJson("/api/contexts/{$this->context->id}/attributes", [
         'key_name' => 'description',
         'value' => $specialValue,
@@ -52,9 +53,9 @@ test('handles special characters in attribute values', function () {
 
 test('prevents sql injection in context slug', function () {
     $this->actingAs($this->user);
-    
+
     $maliciousSlug = "test'; DROP TABLE users; --";
-    
+
     $response = $this->postJson('/api/contexts', [
         'name' => 'Test Context',
         'slug' => $maliciousSlug,
@@ -70,9 +71,9 @@ test('prevents sql injection in context slug', function () {
 
 test('handles missing default context gracefully', function () {
     $userWithoutDefault = User::factory()->create();
-    
+
     $response = $this->getJson("/api/view/profile/{$userWithoutDefault->id}");
-    
+
     $response->assertStatus(200);
     $response->assertJsonPath('error', true);
     $response->assertJsonPath('message', 'This user has no default context configured.');
@@ -80,7 +81,7 @@ test('handles missing default context gracefully', function () {
 
 test('validates context slug uniqueness per user', function () {
     $this->actingAs($this->user);
-    
+
     // Create first context
     $this->postJson('/api/contexts', [
         'name' => 'First',
@@ -101,7 +102,7 @@ test('validates context slug uniqueness per user', function () {
 
 test('rejects empty string values', function () {
     $this->actingAs($this->user);
-    
+
     $response = $this->postJson("/api/contexts/{$this->context->id}/attributes", [
         'key_name' => 'empty_test',
         'value' => '',
@@ -114,20 +115,20 @@ test('rejects empty string values', function () {
 
 test('validates attribute visibility values', function () {
     $this->actingAs($this->user);
-    
+
     $response = $this->postJson("/api/contexts/{$this->context->id}/attributes", [
         'key_name' => 'test',
         'value' => 'test value',
         'visibility' => 'invalid', // Invalid visibility
     ]);
-    
+
     $response->assertStatus(422);
     $response->assertJsonValidationErrors(['visibility']);
 });
 
 test('security headers are present in API responses', function () {
     $response = $this->getJson('/api/user');
-    
+
     $response->assertHeader('X-Content-Type-Options', 'nosniff');
     $response->assertHeader('X-Frame-Options', 'DENY');
     $response->assertHeader('X-XSS-Protection', '1; mode=block');
@@ -136,13 +137,13 @@ test('security headers are present in API responses', function () {
 
 test('correctly logs access attempts', function () {
     $accessor = User::factory()->create();
-    
+
     // Access another user's profile
     $this->actingAs($accessor);
     $response = $this->getJson("/api/view/profile/{$this->user->id}");
-    
+
     $response->assertStatus(200);
-    
+
     // Check access log was created
     $this->assertDatabaseHas('access_logs', [
         'user_id' => $this->user->id,
@@ -155,13 +156,13 @@ test('correctly logs access attempts', function () {
 test('cannot access protected endpoints without authentication', function () {
     $response = $this->getJson('/api/contexts');
     $response->assertStatus(401);
-    
+
     $response = $this->postJson('/api/contexts', [
         'name' => 'Test',
         'slug' => 'test',
     ]);
     $response->assertStatus(401);
-    
+
     $response = $this->deleteJson("/api/contexts/{$this->context->id}");
     $response->assertStatus(401);
 });

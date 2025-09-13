@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use App\Models\Context;
@@ -12,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 
-class AppServiceProvider extends ServiceProvider
+final class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
@@ -35,7 +37,7 @@ class AppServiceProvider extends ServiceProvider
         Scramble::routes(function (\Illuminate\Routing\Route $route) {
             // Get the URI of the route
             $uri = $route->uri();
-            
+
             // Only include routes that start with 'api/' (not 'api-')
             // This excludes /api-demo while including all /api/* routes
             return Str::startsWith($uri, 'api/');
@@ -45,12 +47,12 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
-        
+
         // Rate limiting for authentication endpoints
         RateLimiter::for('auth', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip());
         });
-        
+
         // Rate limiting for GDPR data requests
         RateLimiter::for('gdpr', function (Request $request) {
             return Limit::perHour(5)->by($request->user()?->id ?: $request->ip());

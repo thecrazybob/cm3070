@@ -146,7 +146,126 @@
                         </div>
                         
                         <div class="p-6 max-h-[60vh] overflow-y-auto">
-                            <pre x-text="gdprInfo" class="bg-gray-100 dark:bg-gray-900 p-4 rounded text-sm overflow-auto text-gray-800 dark:text-gray-200"></pre>
+                            <template x-if="gdprInfo">
+                                <div class="space-y-6">
+                                    <!-- Your GDPR Rights -->
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Your GDPR Rights</h4>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <template x-for="(right, key) in gdprInfo.gdpr_rights" :key="key">
+                                                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                                                    <div class="flex items-start">
+                                                        <div class="flex-shrink-0">
+                                                            <template x-if="key === 'right_to_access'">
+                                                                <svg class="h-6 w-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                                </svg>
+                                                            </template>
+                                                            <template x-if="key === 'right_to_portability'">
+                                                                <svg class="h-6 w-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                                                                </svg>
+                                                            </template>
+                                                            <template x-if="key === 'right_to_erasure'">
+                                                                <svg class="h-6 w-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                                </svg>
+                                                            </template>
+                                                            <template x-if="key === 'right_to_rectification'">
+                                                                <svg class="h-6 w-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                                </svg>
+                                                            </template>
+                                                        </div>
+                                                        <div class="ml-3 flex-1">
+                                                            <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100 capitalize" x-text="key.replace(/_/g, ' ')"></h5>
+                                                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400" x-text="right.description"></p>
+                                                            <div class="mt-2 flex items-center">
+                                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" 
+                                                                      :class="right.available ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'">
+                                                                    <template x-if="right.available">
+                                                                        <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                                                        </svg>
+                                                                    </template>
+                                                                    <span x-text="right.available ? 'Available' : 'Not Available'"></span>
+                                                                </span>
+                                                            </div>
+                                                            <code class="mt-2 text-xs text-gray-500 dark:text-gray-400 block" x-text="right.endpoint"></code>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <!-- Data Processing Information -->
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Data Processing Information</h4>
+                                        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4">
+                                            <div>
+                                                <h5 class="text-sm font-medium text-gray-700 dark:text-gray-300">Processing Purposes</h5>
+                                                <ul class="mt-2 space-y-1">
+                                                    <template x-for="purpose in gdprInfo.data_processing.purposes" :key="purpose">
+                                                        <li class="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                                                            <svg class="h-4 w-4 text-blue-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                            </svg>
+                                                            <span x-text="purpose"></span>
+                                                        </li>
+                                                    </template>
+                                                </ul>
+                                            </div>
+                                            
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <h5 class="text-sm font-medium text-gray-700 dark:text-gray-300">Legal Basis</h5>
+                                                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400" x-text="gdprInfo.data_processing.legal_basis"></p>
+                                                </div>
+                                                <div>
+                                                    <h5 class="text-sm font-medium text-gray-700 dark:text-gray-300">Retention Period</h5>
+                                                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400" x-text="gdprInfo.data_processing.retention_period"></p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div>
+                                                <h5 class="text-sm font-medium text-gray-700 dark:text-gray-300">Data Categories</h5>
+                                                <div class="mt-2 flex flex-wrap gap-2">
+                                                    <template x-for="category in gdprInfo.data_processing.data_categories" :key="category">
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200" x-text="category"></span>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Your Account Statistics -->
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Your Account Statistics</h4>
+                                        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                                            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <div>
+                                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Account Created</dt>
+                                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100" x-text="new Date(gdprInfo.user_statistics.account_created).toLocaleDateString()"></dd>
+                                                </div>
+                                                <div>
+                                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Contexts</dt>
+                                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100" x-text="gdprInfo.user_statistics.contexts_count"></dd>
+                                                </div>
+                                                <div>
+                                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Profile Attributes</dt>
+                                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100" x-text="gdprInfo.user_statistics.total_profile_attributes"></dd>
+                                                </div>
+                                                <div>
+                                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Access Logs</dt>
+                                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100" x-text="gdprInfo.user_statistics.access_logs_count"></dd>
+                                                </div>
+                                            </dl>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
                         
                         <div class="px-6 py-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
@@ -245,7 +364,7 @@
                         
                         if (response.ok) {
                             const result = await response.json();
-                            this.gdprInfo = JSON.stringify(result, null, 2);
+                            this.gdprInfo = result;
                             this.showGDPRInfoModal = true;
                         } else {
                             alert('Failed to load GDPR information');

@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-class ApiDemoController extends Controller
+final class ApiDemoController extends Controller
 {
     /**
      * Show the API demo page
@@ -13,9 +15,9 @@ class ApiDemoController extends Controller
     public function index(Request $request): View
     {
         $user = $request->user();
-        
+
         // Ensure user has an API token for dashboard API calls
-        if (!$request->session()->has('api_token')) {
+        if (! $request->session()->has('api_token')) {
             $token = $user->createToken('web-session-token')->plainTextToken;
             $request->session()->put('api_token', $token);
         }

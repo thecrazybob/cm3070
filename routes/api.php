@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ContextController;
 use App\Http\Controllers\GDPRController;
@@ -40,7 +42,7 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
         Route::get('/export-data', [GDPRController::class, 'exportData']);
         Route::delete('/delete-account', [GDPRController::class, 'deleteAccount']);
     });
-    
+
     Route::get('/audit-log', [GDPRController::class, 'getAuditLog']);
     Route::get('/gdpr-info', [GDPRController::class, 'getGDPRInfo']);
 });

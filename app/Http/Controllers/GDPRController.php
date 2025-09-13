@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\AccessLog;
@@ -9,7 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
-class GDPRController extends Controller
+final class GDPRController extends Controller
 {
     /**
      * Show the GDPR controls page
@@ -17,9 +19,9 @@ class GDPRController extends Controller
     public function index(Request $request): View
     {
         $user = $request->user();
-        
+
         // Ensure user has an API token for dashboard API calls
-        if (!$request->session()->has('api_token')) {
+        if (! $request->session()->has('api_token')) {
             $token = $user->createToken('web-session-token')->plainTextToken;
             $request->session()->put('api_token', $token);
         }
@@ -28,6 +30,7 @@ class GDPRController extends Controller
             'user' => $user,
         ]);
     }
+
     /**
      * Export all user data (Right to Data Portability)
      */
@@ -41,6 +44,12 @@ class GDPRController extends Controller
             'accessLogs',
         ]);
 
+        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Context> $contexts */
+        $contexts = $user->contexts;
+        
+        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\AccessLog> $accessLogs */
+        $accessLogs = $user->accessLogs;
+        
         $exportData = [
             'export_info' => [
                 'exported_at' => now()->toISOString(),
@@ -55,7 +64,7 @@ class GDPRController extends Controller
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
             ],
-            'contexts' => $user->contexts->map(function ($context) {
+            'contexts' => $contexts->map(function ($context) {
                 return [
                     'id' => $context->id,
                     'slug' => $context->slug,
@@ -81,7 +90,7 @@ class GDPRController extends Controller
                     }),
                 ];
             }),
-            'access_logs' => $user->accessLogs->map(function ($log) {
+            'access_logs' => $accessLogs->map(function ($log) {
                 return [
                     'id' => $log->id,
                     'user_id' => $log->user_id,
@@ -117,7 +126,7 @@ class GDPRController extends Controller
     public function getAuditLog(Request $request): JsonResponse
     {
         $user = $request->user();
-        
+
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
 
@@ -139,7 +148,16 @@ class GDPRController extends Controller
             ];
         });
 
-        return response()->json($logs);
+        return response()->json([
+            'access_logs' => $logs->items(),
+            'total_logs' => $logs->total(),
+            'pagination' => [
+                'current_page' => $logs->currentPage(),
+                'per_page' => $logs->perPage(),
+                'total' => $logs->total(),
+                'last_page' => $logs->lastPage(),
+            ],
+        ]);
     }
 
     /**

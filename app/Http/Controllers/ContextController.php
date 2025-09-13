@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateContextRequest;
@@ -12,7 +14,7 @@ use App\Models\ProfileAttribute;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class ContextController extends Controller
+final class ContextController extends Controller
 {
     /**
      * Get all contexts for the authenticated user with pagination
@@ -20,12 +22,12 @@ class ContextController extends Controller
     public function index(Request $request): JsonResponse
     {
         $perPage = $request->input('per_page', 10);
-        
+
         $contexts = $request->user()->contexts()
             ->withCount('profileValues')
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
-        
+
         // Transform the data while preserving pagination structure
         $contexts->getCollection()->transform(function ($context) {
             return [
@@ -40,8 +42,16 @@ class ContextController extends Controller
                 'updated_at' => $context->updated_at,
             ];
         });
-        
-        return response()->json($contexts);
+
+        return response()->json([
+            'contexts' => $contexts->items(),
+            'pagination' => [
+                'current_page' => $contexts->currentPage(),
+                'per_page' => $contexts->perPage(),
+                'total' => $contexts->total(),
+                'last_page' => $contexts->lastPage(),
+            ],
+        ]);
     }
 
     /**
@@ -90,7 +100,9 @@ class ContextController extends Controller
             return response()->json(['message' => 'Context not found'], 404);
         }
 
-        $attributes = $context->profileValues->map(function ($profileValue) {
+        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\ContextProfileValue> $profileValues */
+        $profileValues = $context->profileValues;
+        $attributes = $profileValues->map(function ($profileValue) {
             return [
                 'id' => $profileValue->id,
                 'attribute' => [
@@ -193,10 +205,11 @@ class ContextController extends Controller
             return response()->json(['message' => 'Context not found'], 404);
         }
 
-        $attributes = $context->profileValues()
+        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\ContextProfileValue> $profileValues */
+        $profileValues = $context->profileValues()
             ->with('attribute')
-            ->get()
-            ->map(function ($profileValue) {
+            ->get();
+        $attributes = $profileValues->map(function ($profileValue) {
                 return [
                     'id' => $profileValue->id,
                     'attribute' => [
@@ -284,11 +297,11 @@ class ContextController extends Controller
         $context = Context::where('id', $contextId)
             ->where('user_id', $request->user()->id)
             ->first();
-        
+
         if (! $context) {
             return response()->json(['message' => 'Context not found'], 404);
         }
-        
+
         $profileValue = ContextProfileValue::where('id', $attributeId)
             ->where('user_id', $request->user()->id)
             ->where('context_id', $contextId)
@@ -318,11 +331,11 @@ class ContextController extends Controller
         $context = Context::where('id', $contextId)
             ->where('user_id', $request->user()->id)
             ->first();
-        
+
         if (! $context) {
             return response()->json(['message' => 'Context not found'], 404);
         }
-        
+
         $profileValue = ContextProfileValue::where('id', $attributeId)
             ->where('user_id', $request->user()->id)
             ->where('context_id', $contextId)
@@ -347,7 +360,7 @@ class ContextController extends Controller
         $context = Context::where('id', $contextId)
             ->where('user_id', $request->user()->id)
             ->first();
-        
+
         if (! $context) {
             return response()->json(['message' => 'Context not found'], 404);
         }
