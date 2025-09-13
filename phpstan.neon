@@ -1,0 +1,38 @@
+includes:
+    - vendor/nunomaduro/larastan/extension.neon
+
+parameters:
+    paths:
+        - app
+        - bootstrap/app.php
+        - config
+        - database
+        - routes
+
+    level: 5
+
+    excludePaths:
+        - tests/*
+        - database/migrations/*
+
+    ignoreErrors:
+        # Ignore Eloquent magic properties
+        - '#Access to an undefined property Illuminate\\Database\\Eloquent\\Model::#'
+        - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Model::#'
+        # Ignore Collection transform issues
+        - '#Parameter \#1 \$callback of method Illuminate\\Support\\Collection.*contains unresolvable type#'
+        # Ignore MustVerifyEmail type issues
+        - '#Parameter \#1 \$user of class Illuminate\\Auth\\Events\\Verified constructor expects#'
+
+    treatPhpDocTypesAsCertain: false
+
+    databaseMigrationsPath:
+        - database/migrations
+
+    scanDirectories:
+        - app
+        - database/factories
+
+    universalObjectCratesClasses:
+        - Illuminate\Http\Request
+        - Illuminate\Support\Fluent
