@@ -29,9 +29,7 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        ResetPassword::createUrlUsing(function (object $notifiable, string $token) {
-            return config('app.frontend_url')."/password-reset/$token?email={$notifiable->getEmailForPasswordReset()}";
-        });
+        ResetPassword::createUrlUsing(fn (object $notifiable, string $token): string => config('app.frontend_url')."/password-reset/$token?email={$notifiable->getEmailForPasswordReset()}");
 
         // Configure Scramble to only document actual API routes (excluding /api-demo)
         Scramble::routes(function (\Illuminate\Routing\Route $route) {
@@ -44,19 +42,13 @@ final class AppServiceProvider extends ServiceProvider
         });
 
         // Configure rate limiting
-        RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
-        });
+        RateLimiter::for('api', fn (Request $request) => Limit::perMinute(60)->by($request->user()?->id ?: $request->ip()));
 
         // Rate limiting for authentication endpoints
-        RateLimiter::for('auth', function (Request $request) {
-            return Limit::perMinute(5)->by($request->ip());
-        });
+        RateLimiter::for('auth', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
 
         // Rate limiting for GDPR data requests
-        RateLimiter::for('gdpr', function (Request $request) {
-            return Limit::perHour(5)->by($request->user()?->id ?: $request->ip());
-        });
+        RateLimiter::for('gdpr', fn (Request $request) => Limit::perHour(5)->by($request->user()?->id ?: $request->ip()));
 
         // Custom route model binding for Context
         Route::bind('context', function ($value) {

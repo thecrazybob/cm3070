@@ -65,7 +65,7 @@ final class ManageAttribute extends Component implements HasActions, HasForms
                     ->regex('/^[a-z0-9_]+$/')
                     ->helperText('Lowercase letters, numbers, and underscores only (e.g., full_name, email, phone_number)')
                     ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set) {
+                    ->afterStateUpdated(function ($state, callable $set): void {
                         if (filled($state)) {
                             // Auto-generate display name from key name
                             $displayName = Str::title(str_replace('_', ' ', $state));
@@ -100,7 +100,7 @@ final class ManageAttribute extends Component implements HasActions, HasForms
                     ->required()
                     ->maxLength(1000)
                     ->rows(2)
-                    ->helperText(function (callable $get) {
+                    ->helperText(function (callable $get): string {
                         $type = $get('data_type') ?? 'string';
 
                         return match ($type) {
@@ -179,7 +179,7 @@ final class ManageAttribute extends Component implements HasActions, HasForms
     {
         return Action::make('editAttribute')
             ->modalHeading('Edit Attribute')
-            ->fillForm(fn () => $this->editingAttribute ? [
+            ->fillForm(fn (): array => $this->editingAttribute instanceof ContextProfileValue ? [
                 'key_name' => $this->editingAttribute->attribute->key_name,
                 'display_name' => $this->editingAttribute->attribute->display_name,
                 'data_type' => $this->editingAttribute->attribute->data_type,
@@ -244,12 +244,12 @@ final class ManageAttribute extends Component implements HasActions, HasForms
             ->modalCancelActionLabel('Cancel');
     }
 
-    public function render()
+    public function render(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         return view('livewire.manage-attribute');
     }
 
-    protected function getValidationRules(string $dataType): array
+    private function getValidationRules(string $dataType): array
     {
         return match ($dataType) {
             'email' => ['email'],

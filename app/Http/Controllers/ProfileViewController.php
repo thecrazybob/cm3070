@@ -13,12 +13,7 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 final class ProfileViewController extends Controller
 {
-    protected ProfileRetrievalService $profileRetrievalService;
-
-    public function __construct(ProfileRetrievalService $profileRetrievalService)
-    {
-        $this->profileRetrievalService = $profileRetrievalService;
-    }
+    public function __construct(private readonly ProfileRetrievalService $profileRetrievalService) {}
 
     /**
      * Retrieve a user's profile with context-aware access control

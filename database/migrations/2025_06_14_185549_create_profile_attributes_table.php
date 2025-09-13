@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('profile_attributes', function (Blueprint $table) {
+        Schema::create('profile_attributes', function (Blueprint $table): void {
             $table->id();
             $table->string('key_name', 50)->unique();
             $table->string('display_name', 100);

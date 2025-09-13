@@ -29,19 +29,17 @@ final class ContextController extends Controller
             ->paginate($perPage);
 
         // Transform the data while preserving pagination structure
-        $contexts->getCollection()->transform(function ($context) {
-            return [
-                'id' => $context->id,
-                'slug' => $context->slug,
-                'name' => $context->name,
-                'description' => $context->description,
-                'is_default' => $context->is_default,
-                'is_active' => $context->is_active,
-                'attributes_count' => $context->profile_values_count,
-                'created_at' => $context->created_at,
-                'updated_at' => $context->updated_at,
-            ];
-        });
+        $contexts->getCollection()->transform(fn ($context): array => [
+            'id' => $context->id,
+            'slug' => $context->slug,
+            'name' => $context->name,
+            'description' => $context->description,
+            'is_default' => $context->is_default,
+            'is_active' => $context->is_active,
+            'attributes_count' => $context->profile_values_count,
+            'created_at' => $context->created_at,
+            'updated_at' => $context->updated_at,
+        ]);
 
         return response()->json([
             'contexts' => $contexts->items(),
@@ -100,21 +98,19 @@ final class ContextController extends Controller
             return response()->json(['message' => 'Context not found'], 404);
         }
 
-        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\ContextProfileValue> $profileValues */
+        /** @var \Illuminate\Database\Eloquent\Collection<int, ContextProfileValue> $profileValues */
         $profileValues = $context->profileValues;
-        $attributes = $profileValues->map(function ($profileValue) {
-            return [
-                'id' => $profileValue->id,
-                'attribute' => [
-                    'id' => $profileValue->attribute->id,
-                    'key_name' => $profileValue->attribute->key_name,
-                    'display_name' => $profileValue->attribute->display_name,
-                    'data_type' => $profileValue->attribute->data_type,
-                ],
-                'value' => $profileValue->value,
-                'visibility' => $profileValue->visibility,
-            ];
-        });
+        $attributes = $profileValues->map(fn ($profileValue): array => [
+            'id' => $profileValue->id,
+            'attribute' => [
+                'id' => $profileValue->attribute->id,
+                'key_name' => $profileValue->attribute->key_name,
+                'display_name' => $profileValue->attribute->display_name,
+                'data_type' => $profileValue->attribute->data_type,
+            ],
+            'value' => $profileValue->value,
+            'visibility' => $profileValue->visibility,
+        ]);
 
         return response()->json([
             'context' => [
@@ -205,23 +201,21 @@ final class ContextController extends Controller
             return response()->json(['message' => 'Context not found'], 404);
         }
 
-        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\ContextProfileValue> $profileValues */
+        /** @var \Illuminate\Database\Eloquent\Collection<int, ContextProfileValue> $profileValues */
         $profileValues = $context->profileValues()
             ->with('attribute')
             ->get();
-        $attributes = $profileValues->map(function ($profileValue) {
-                return [
-                    'id' => $profileValue->id,
-                    'attribute' => [
-                        'id' => $profileValue->attribute->id,
-                        'key_name' => $profileValue->attribute->key_name,
-                        'display_name' => $profileValue->attribute->display_name,
-                        'data_type' => $profileValue->attribute->data_type,
-                    ],
-                    'value' => $profileValue->value,
-                    'visibility' => $profileValue->visibility,
-                ];
-            });
+        $attributes = $profileValues->map(fn ($profileValue): array => [
+            'id' => $profileValue->id,
+            'attribute' => [
+                'id' => $profileValue->attribute->id,
+                'key_name' => $profileValue->attribute->key_name,
+                'display_name' => $profileValue->attribute->display_name,
+                'data_type' => $profileValue->attribute->data_type,
+            ],
+            'value' => $profileValue->value,
+            'visibility' => $profileValue->visibility,
+        ]);
 
         return response()->json([
             'attributes' => $attributes,

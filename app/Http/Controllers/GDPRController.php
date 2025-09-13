@@ -46,10 +46,10 @@ final class GDPRController extends Controller
 
         /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Context> $contexts */
         $contexts = $user->contexts;
-        
-        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\AccessLog> $accessLogs */
+
+        /** @var \Illuminate\Database\Eloquent\Collection<int, AccessLog> $accessLogs */
         $accessLogs = $user->accessLogs;
-        
+
         $exportData = [
             'export_info' => [
                 'exported_at' => now()->toISOString(),
@@ -64,51 +64,43 @@ final class GDPRController extends Controller
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
             ],
-            'contexts' => $contexts->map(function ($context) {
-                return [
-                    'id' => $context->id,
-                    'slug' => $context->slug,
-                    'name' => $context->name,
-                    'description' => $context->description,
-                    'is_default' => $context->is_default,
-                    'is_active' => $context->is_active,
-                    'created_at' => $context->created_at,
-                    'updated_at' => $context->updated_at,
-                    'profile_values' => $context->profileValues->map(function ($profileValue) {
-                        return [
-                            'id' => $profileValue->id,
-                            'attribute' => [
-                                'key_name' => $profileValue->attribute->key_name,
-                                'display_name' => $profileValue->attribute->display_name,
-                                'data_type' => $profileValue->attribute->data_type,
-                            ],
-                            'value' => $profileValue->value,
-                            'visibility' => $profileValue->visibility,
-                            'created_at' => $profileValue->created_at,
-                            'updated_at' => $profileValue->updated_at,
-                        ];
-                    }),
-                ];
-            }),
-            'access_logs' => $accessLogs->map(function ($log) {
-                return [
-                    'id' => $log->id,
-                    'user_id' => $log->user_id,
-                    'context_requested' => $log->context_requested,
-                    'accessor_type' => $log->accessor_type,
-                    'accessor_id' => $log->accessor_id,
-                    'attributes_returned' => $log->attributes_returned,
-                    'ip_address' => $log->ip_address,
-                    'user_agent' => $log->user_agent,
-                    'response_code' => $log->response_code,
-                    'created_at' => $log->created_at,
-                ];
-            }),
+            'contexts' => $contexts->map(fn ($context): array => [
+                'id' => $context->id,
+                'slug' => $context->slug,
+                'name' => $context->name,
+                'description' => $context->description,
+                'is_default' => $context->is_default,
+                'is_active' => $context->is_active,
+                'created_at' => $context->created_at,
+                'updated_at' => $context->updated_at,
+                'profile_values' => $context->profileValues->map(fn ($profileValue): array => [
+                    'id' => $profileValue->id,
+                    'attribute' => [
+                        'key_name' => $profileValue->attribute->key_name,
+                        'display_name' => $profileValue->attribute->display_name,
+                        'data_type' => $profileValue->attribute->data_type,
+                    ],
+                    'value' => $profileValue->value,
+                    'visibility' => $profileValue->visibility,
+                    'created_at' => $profileValue->created_at,
+                    'updated_at' => $profileValue->updated_at,
+                ]),
+            ]),
+            'access_logs' => $accessLogs->map(fn ($log): array => [
+                'id' => $log->id,
+                'user_id' => $log->user_id,
+                'context_requested' => $log->context_requested,
+                'accessor_type' => $log->accessor_type,
+                'accessor_id' => $log->accessor_id,
+                'attributes_returned' => $log->attributes_returned,
+                'ip_address' => $log->ip_address,
+                'user_agent' => $log->user_agent,
+                'response_code' => $log->response_code,
+                'created_at' => $log->created_at,
+            ]),
             'statistics' => [
                 'total_contexts' => $user->contexts->count(),
-                'total_profile_values' => $user->contexts->sum(function ($context) {
-                    return $context->profileValues->count();
-                }),
+                'total_profile_values' => $user->contexts->sum(fn ($context) => $context->profileValues->count()),
                 'total_access_logs' => $user->accessLogs->count(),
                 'account_age_days' => $user->created_at->diffInDays(now()),
             ],
@@ -128,25 +120,23 @@ final class GDPRController extends Controller
         $user = $request->user();
 
         $perPage = $request->input('per_page', 10);
-        $page = $request->input('page', 1);
+        $request->input('page', 1);
 
         $logs = AccessLog::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
         // Transform the data while preserving pagination structure
-        $logs->getCollection()->transform(function ($log) {
-            return [
-                'id' => $log->id,
-                'created_at' => $log->created_at,
-                'context_requested' => $log->context_requested,
-                'accessor_type' => $log->accessor_type,
-                'attributes_returned' => $log->attributes_returned,
-                'ip_address' => $log->ip_address,
-                'accessor_id' => $log->accessor_id,
-                'response_code' => $log->response_code,
-            ];
-        });
+        $logs->getCollection()->transform(fn ($log): array => [
+            'id' => $log->id,
+            'created_at' => $log->created_at,
+            'context_requested' => $log->context_requested,
+            'accessor_type' => $log->accessor_type,
+            'attributes_returned' => $log->attributes_returned,
+            'ip_address' => $log->ip_address,
+            'accessor_id' => $log->accessor_id,
+            'response_code' => $log->response_code,
+        ]);
 
         return response()->json([
             'access_logs' => $logs->items(),

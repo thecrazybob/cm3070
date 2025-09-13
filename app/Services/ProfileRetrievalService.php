@@ -26,13 +26,13 @@ final class ProfileRetrievalService
 
         $context = $this->findContext($user, $contextSlug);
 
-        if (! $context) {
+        if (! $context instanceof Context) {
             // Return a graceful error response instead of throwing an exception
             $this->logAccessAttempt($user, $contextSlug, $requester, 'context_not_found');
 
             return [
                 'error' => true,
-                'message' => $contextSlug
+                'message' => $contextSlug !== null && $contextSlug !== '' && $contextSlug !== '0'
                     ? "The requested context '{$contextSlug}' does not exist for this user or is not accessible."
                     : 'This user has no default context configured.',
                 'available_contexts' => $this->getAvailableContexts($user, $requester),
@@ -52,12 +52,14 @@ final class ProfileRetrievalService
 
     private function findContext(User $user, ?string $contextSlug): ?Context
     {
-        if ($contextSlug) {
+        if ($contextSlug !== null && $contextSlug !== '' && $contextSlug !== '0') {
             $context = $user->contexts()->where('slug', $contextSlug)->first();
+
             return $context instanceof Context ? $context : null;
         }
 
         $context = $user->contexts()->where('is_default', true)->first();
+
         return $context instanceof Context ? $context : null;
     }
 
@@ -77,7 +79,7 @@ final class ProfileRetrievalService
         $requester = Auth::user();
         if ($requester) {
             // Check if requester has any special access rules (simplified version)
-            $hasSpecialAccess = $this->checkSpecialAccess($user, $context, $requester);
+            $hasSpecialAccess = $this->checkSpecialAccess($user, $requester);
 
             if ($hasSpecialAccess) {
                 // If user has special access, show public and protected attributes
@@ -101,16 +103,12 @@ final class ProfileRetrievalService
     /**
      * Check if requester has special access permissions
      */
-    private function checkSpecialAccess(User $user, Context $context, User $requester): bool
+    private function checkSpecialAccess(User $user, User $requester): bool
     {
         // Check if users share an organization or domain
-        if ($this->sharesSameDomain($user, $requester)) {
-            return true;
-        }
-
         // Future: Check access_rules table for specific permissions
         // Currently simplified to domain-based access
-        return false;
+        return $this->sharesSameDomain($user, $requester);
     }
 
     /**
@@ -163,8 +161,8 @@ final class ProfileRetrievalService
     {
         AccessLog::create([
             'user_id' => $user->id,
-            'accessor_type' => $requester ? 'user' : 'anonymous',
-            'accessor_id' => $requester ? $requester->id : null,
+            'accessor_type' => $requester instanceof User ? 'user' : 'anonymous',
+            'accessor_id' => $requester instanceof User ? $requester->id : null,
             'context_requested' => $context->slug,
             'attributes_returned' => $profileValues->pluck('key_name'),
             'ip_address' => request()->ip(),
@@ -177,8 +175,8 @@ final class ProfileRetrievalService
     {
         AccessLog::create([
             'user_id' => $user->id,
-            'accessor_type' => $requester ? 'user' : 'anonymous',
-            'accessor_id' => $requester ? $requester->id : null,
+            'accessor_type' => $requester instanceof User ? 'user' : 'anonymous',
+            'accessor_id' => $requester instanceof User ? $requester->id : null,
             'context_requested' => $contextSlug,
             'attributes_returned' => json_encode(['error' => $result]),
             'ip_address' => request()->ip(),
@@ -202,7 +200,7 @@ final class ProfileRetrievalService
         // Non-owners can only see public contexts (simplified logic)
         return $user->contexts()
             ->where('is_active', true)
-            ->whereHas('profileValues', function ($query) {
+            ->whereHas('profileValues', function ($query): void {
                 $query->where('visibility', 'public');
             })
             ->pluck('slug')

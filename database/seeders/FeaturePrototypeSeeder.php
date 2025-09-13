@@ -78,7 +78,7 @@ final class FeaturePrototypeSeeder extends Seeder
         $this->command->info('Profile values populated for users.');
     }
 
-    private function createProfileValue(User $user, Context $context, string $keyName, string $value, string $visibility)
+    private function createProfileValue(User $user, Context $context, string $keyName, string $value, string $visibility): void
     {
         $attribute = ProfileAttribute::where('key_name', $keyName)->first();
         if ($attribute) {

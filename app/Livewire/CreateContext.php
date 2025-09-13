@@ -50,7 +50,7 @@ final class CreateContext extends Component implements HasActions, HasForms
                     ->required()
                     ->maxLength(255)
                     ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set) {
+                    ->afterStateUpdated(function ($state, callable $set): void {
                         if (filled($state)) {
                             $set('slug', Str::slug($state));
                         }
@@ -65,9 +65,7 @@ final class CreateContext extends Component implements HasActions, HasForms
                     ->unique(
                         table: 'contexts',
                         column: 'slug',
-                        modifyRuleUsing: function ($rule) {
-                            return $rule->where('user_id', auth()->id());
-                        }
+                        modifyRuleUsing: fn ($rule) => $rule->where('user_id', auth()->id())
                     ),
 
                 Textarea::make('description')
@@ -99,7 +97,7 @@ final class CreateContext extends Component implements HasActions, HasForms
     {
         return Action::make('editContext')
             ->modalHeading('Edit Context')
-            ->fillForm(fn () => $this->editingContext ? [
+            ->fillForm(fn (): array => $this->editingContext instanceof Context ? [
                 'name' => $this->editingContext->name,
                 'slug' => $this->editingContext->slug,
                 'description' => $this->editingContext->description,
@@ -121,10 +119,8 @@ final class CreateContext extends Component implements HasActions, HasForms
                         table: 'contexts',
                         column: 'slug',
                         ignoreRecord: true,
-                        modifyRuleUsing: function ($rule) {
-                            return $rule->where('user_id', auth()->id())
-                                ->where('id', '!=', $this->editingContext?->id);
-                        }
+                        modifyRuleUsing: fn ($rule) => $rule->where('user_id', auth()->id())
+                            ->where('id', '!=', $this->editingContext?->id)
                     ),
 
                 Textarea::make('description')
@@ -150,7 +146,7 @@ final class CreateContext extends Component implements HasActions, HasForms
             ->modalCancelActionLabel('Cancel');
     }
 
-    public function render()
+    public function render(): \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory
     {
         return view('livewire.create-context');
     }

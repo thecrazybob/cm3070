@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('api_clients', function (Blueprint $table) {
+        Schema::create('api_clients', function (Blueprint $table): void {
             $table->id();
             $table->uuid()->unique();
             $table->string('name', 100);
